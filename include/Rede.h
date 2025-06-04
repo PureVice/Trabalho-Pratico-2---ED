@@ -40,6 +40,7 @@ public:
     
     // Método de visualização
     void ImprimeVizinhos(int v) const;
+    Lista* getNos() const { return nos; }
 };
 
 #endif // REDE_H

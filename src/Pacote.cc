@@ -15,3 +15,8 @@ Pacote::~Pacote() {
     delete[] remetente;
     delete[] destinatario;
 }
+
+int Pacote::getId(){
+
+    return id;
+}
