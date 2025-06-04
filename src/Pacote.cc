@@ -1,29 +1,17 @@
-#include <string> // Não esqueça de incluir a biblioteca <string>
+#include "../include/Pacote.h"
+#include <cstring>
+#include <iostream>
 
-class Pacote {
-public:
-    int id;
-    std::string remetente; // Alterado para std::string
-    std::string destinatario; // Alterado para std::string
-    char tipo;
-    int id_armz_orig;
-    int id_armz_dest;
+Pacote::Pacote(int id, const char* remetente, const char* destinatario, char tipo, int id_armz_orig, int id_armz_dest)
+    : id(id), tipo(tipo), id_armz_orig(id_armz_orig), id_armz_dest(id_armz_dest) {
+    this->remetente = new char[strlen(remetente) + 1];
+    strcpy(this->remetente, remetente);
 
-    // Construtor corrigido
-    Pacote(int id, const std::string& remetente, const std::string& destinatario, char tipo, int id_armz_orig, int id_armz_dest) {
-        this->id = id;
-        this->remetente = remetente;       // std::string faz a cópia profunda automaticamente
-        this->destinatario = destinatario; // std::string faz a cópia profunda automaticamente
-        this->tipo = tipo;
-        this->id_armz_orig = id_armz_orig;
-        this->id_armz_dest = id_armz_dest;
-    }
+    this->destinatario = new char[strlen(destinatario) + 1];
+    strcpy(this->destinatario, destinatario);
+}
 
-    // Se precisar de um construtor que aceite const char*, pode sobrecarregar:
-    Pacote(int id, const char* remetente_c, const char* destinatario_c, char tipo, int id_armz_orig, int id_armz_dest)
-        : Pacote(id, std::string(remetente_c), std::string(destinatario_c), tipo, id_armz_orig, id_armz_dest) {
-        // Este construtor chama o construtor principal que usa std::string
-    }
-
-    // Outros métodos da classe...
-};
+Pacote::~Pacote() {
+    delete[] remetente;
+    delete[] destinatario;
+}

@@ -22,7 +22,7 @@ public:
 private:
     NoPilha* topoPilha;
 };
-
+//armazem --> secoes --> pilha --> pacotes
 class Armazem {
 public:
     Armazem(int id, int numDestnPossiveis);
