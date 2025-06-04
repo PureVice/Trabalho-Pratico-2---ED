@@ -1,10 +1,10 @@
 #ifndef TRANSPORTE_H
 #define TRANSPORTE_H
 
-class Pacote(){
+class Pacote{
 
     private:
-        int chave;
+        int id;
         char * remetente;
         char * destinatario;
         char tipo;
@@ -17,7 +17,7 @@ class Pacote(){
         ~Pacote();
     
     
-}
+};
 
 
 
