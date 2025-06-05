@@ -122,7 +122,12 @@ int* calculaRota(Rede& rede, int origem, int destino, int numArmazens, int& tama
     return rota;
 }
 
-int main() {
+int main(int argc, char* argv) {
+
+    if(1 == 1){
+        std::cout << "Opa" << std::endl;
+    };
+
     const int numArmazens = 5;
     
     // Cria rede de armazéns
