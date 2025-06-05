@@ -27,15 +27,24 @@ class Armazem {
 public:
     Armazem(int id, int numDestnPossiveis);
     ~Armazem();
-
-    void armazenarPacote(int destino, Pacote* pacote);
-    Pacote* recuperarPacote(int destino);
+    
+    void armazenarPacote(int destino, Pacote* pacote, double tempoAtual);
+    Pacote* recuperarPacote(int destino, double tempoAtual);
     bool temPacoteParaDestino(int destino) const;
-
+    
+    // Novo método para recuperar pacotes sem removê-los
+    PilhaPacotes* getSecao(int destino) const { 
+        if (destino >= 0 && destino < numDestnPossiveis) {
+            return secoes[destino];
+        }
+        return nullptr;
+    }
+    
 private:
     int id;
-    int numDestnPossiveis; // número total de armazéns
-    PilhaPacotes** secoes; // vetor de ponteiros para pilhas (um para cada armazém conectado)
+    int numDestnPossiveis;
+    PilhaPacotes** secoes;
 };
+
 
 #endif // ARMAZEM_H

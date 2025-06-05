@@ -1,0 +1,6 @@
+1 Chaves Madruga Fragil 1 2 0.0
+
+
+# Esperado: Pacote criado no tempo 0, enviado de A para B, chega no tempo 5
+# DEBUG: ver pacotes sendo criados, enviados e recebidos com tempo correto
+
