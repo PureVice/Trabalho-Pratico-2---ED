@@ -156,30 +156,8 @@ Simulador::~Simulador() {
     delete[] armazens;
 }
 
-void Simulador::carregarPacotes(const char* arquivo) {
-    std::ifstream file(arquivo);
-    if (!file.is_open()) {
-        std::cerr << "Erro ao abrir arquivo de pacotes!" << std::endl;
-        return;
-    }
+void Simulador::carregarDados(const char* arquivo) {
     
-    int id;
-    char remetente[100], destinatario[100], tipo;
-    int origem, destino;
-    double tempoPostagem;
-    
-    while (file >> id >> remetente >> destinatario >> tipo >> origem >> destino >> tempoPostagem) {
-        Pacote* pacote = new Pacote(id, remetente, destinatario, tipo, origem, destino, tempoPostagem);
-        
-        // Calcular e armazenar rota
-        calcularERegistrarRota(pacote);
-        
-        // Escalonar chegada do pacote
-        ChegadaPacoteEvento* evento = new ChegadaPacoteEvento(tempoPostagem, pacote, origem);
-        escalonador.insereEvento(evento);
-    }
-    
-    file.close();
 }
 
 void Simulador::inicializarTransportes() {

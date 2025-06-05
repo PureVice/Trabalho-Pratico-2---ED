@@ -56,9 +56,9 @@ Rede::~Rede() {
     }
 }
 
-int Rede::QuantidadeArmazens() {
+int Rede::QuantidadeArmazens(Rede* rede) {
     int c = 0;
-    Lista* aux = nos;
+    Lista* aux = rede->nos;
     while (aux != nullptr) {
         c++;
         aux = aux->proximo;
@@ -66,10 +66,10 @@ int Rede::QuantidadeArmazens() {
     return c;
 }
 
-int Rede::QuantidadeArestas() {
+int Rede::QuantidadeArestas(Rede* rede) {
     int numArestas = 0;
     int count = 0;
-    Lista* aux = nos;
+    Lista* aux = rede->nos;
 
     while(aux != nullptr) {
         Lista* no = aux->valorLista;
@@ -84,10 +84,10 @@ int Rede::QuantidadeArestas() {
     return numArestas/2;
 }
 
-int Rede::GrauMinimo() {
+int Rede::GrauMinimo(Rede* rede) {
     int grauMin = 0;
     int count = 0;
-    Lista* aux = nos;
+    Lista* aux = rede->nos;
 
     while(aux != nullptr) {
         Lista* no = aux->valorLista;
@@ -110,10 +110,10 @@ int Rede::GrauMinimo() {
     return grauMin;
 }
 
-int Rede::GrauMaximo() {
+int Rede::GrauMaximo(Rede* rede) {
     int grauMax = 0;
     int count = 0;
-    Lista* aux = nos;
+    Lista* aux = rede->nos;
 
     while(aux != nullptr) {
         Lista* no = aux->valorLista;
@@ -134,14 +134,14 @@ int Rede::GrauMaximo() {
     return grauMax;
 }
 
-void Rede::InsereArmazem() {
-    int v = QuantidadeArmazens();
+void Rede::InsereArmazem(Rede* rede) {
+    int v = QuantidadeArmazens(rede);
 
-    if(nos == nullptr) {
-        nos = criaLista(TIPO_LISTA, nullptr, v);
+    if(rede->nos == nullptr) {
+        rede->nos = criaLista(TIPO_LISTA, nullptr, v);
     }
     else {
-        adicionaItem(nos, nullptr, v);
+        adicionaItem(rede->nos, nullptr, v);
     }
 }
 

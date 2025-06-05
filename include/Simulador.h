@@ -99,7 +99,7 @@ public:
     ~Simulador();
     
     void executar();
-    void carregarPacotes(const char* arquivo); // Para carregar pacotes de arquivo
+    void carregarDados(const char* arquivo); // Para carregar pacotes de arquivo
     
 private:
     Rede& rede;

@@ -33,13 +33,13 @@ public:
     ~Rede();
 
     // Métodos de análise da rede
-    int QuantidadeArmazens() ;
-    int QuantidadeArestas() ;
-    int GrauMinimo() ;
-    int GrauMaximo() ;
+    int QuantidadeArmazens(Rede* rede) ;
+    int QuantidadeArestas(Rede* rede) ;
+    int GrauMinimo(Rede* rede) ;
+    int GrauMaximo(Rede* rede) ;
 
     // Métodos de modificação da rede
-    void InsereArmazem();
+    void InsereArmazem(Rede* rede);
     void InsereAresta(int v, int w);
     
     // Método de visualização
