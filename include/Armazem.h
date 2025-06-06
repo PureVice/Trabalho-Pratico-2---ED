@@ -2,29 +2,14 @@
 #define ARMAZEM_H
 
 #include "Pacote.h"
+#include "Secao.h"
 
 // Estrutura de nó para pilha de pacotes
-struct NoPilha {
-    Pacote* pacote;
-    NoPilha* proximo;
-};
 
-class PilhaPacotes {
-public:
-    PilhaPacotes();
-    ~PilhaPacotes();
-
-    void empilhar(Pacote* pacote);
-    Pacote* desempilhar();
-    Pacote* topo();
-    bool vazia() const;
-
-private:
-    NoPilha* topoPilha;
-};
 //armazem --> secoes --> pilha --> pacotes
 class Armazem {
 public:
+    Armazem();
     Armazem(int id, int numDestnPossiveis);
     ~Armazem();
 

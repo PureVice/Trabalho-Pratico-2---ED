@@ -16,7 +16,7 @@ class Pacote{
         Pacote(int id, const char* remetente, const char* destinatario, char tipo, int id_armz_orig, int id_armz_dest);
         ~Pacote();
         int getId();
-    
+        void imprimePacote();
     
 };
 

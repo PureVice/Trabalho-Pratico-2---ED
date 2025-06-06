@@ -5,6 +5,6 @@
 2 2 4
 2 0 3
 3
-101 0 3 Remetente_A Destinatario_X Documento
-102 0 1 Remetente_B Destinatario_Y Caixa_Pequena
-103 0 3 Remetente_C Destinatario_Z Eletronico
+0 3 Remetente_A Destinatario_X D
+0 1 Remetente_B Destinatario_Y C
+0 3 Remetente_C Destinatario_Z E
