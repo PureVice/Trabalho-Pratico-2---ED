@@ -41,13 +41,8 @@ $(OBJ_FOLDER)%.o: $(SRC_FOLDER)%.cc
 
 all: $(OBJ)
 	$(CC) $(CXXFLAGS) -o $(BIN_FOLDER)$(TARGET) $(OBJ)
-<<<<<<< HEAD
-	./bin/$(TARGET) pacotes.txt
-=======
 	./bin/$(TARGET) teste.txt
->>>>>>> 55cf70206dda4e4b39a4bbb50634858c85e01dcc
 
 
 clean:
 	@rm -rf $(OBJ_FOLDER)* $(BIN_FOLDER)*
-
