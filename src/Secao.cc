@@ -1,3 +1,5 @@
+#include "Secao.h"
+
 PilhaPacotes::PilhaPacotes() : topoPilha(nullptr) {}
 
 PilhaPacotes::~PilhaPacotes() {
@@ -10,6 +12,7 @@ void PilhaPacotes::empilhar(Pacote* pacote) {
     NoPilha* novo = new NoPilha{pacote, topoPilha};
     topoPilha = novo;
 }
+
 
 Pacote* PilhaPacotes::desempilhar() {
     if (vazia()) return nullptr;
@@ -27,4 +30,34 @@ Pacote* PilhaPacotes::topo() {
 
 bool PilhaPacotes::vazia() const {
     return topoPilha == nullptr;
+}
+
+//SECAO
+Secao::Secao() : id_armazem(-1), pilhaPacotes(new PilhaPacotes()) {}
+Secao::Secao(int id_armazem) : id_armazem(id_armazem), pilhaPacotes(new PilhaPacotes()) {}
+Secao::~Secao() {
+    delete []pilhaPacotes;
+}
+void Secao::addPacote(Pacote* pacote) {
+    pilhaPacotes->empilhar(pacote);
+}
+
+Pacote* Secao::desempilhar() {
+    return pilhaPacotes->desempilhar();
+}
+
+Pacote* Secao::topo() {
+    return pilhaPacotes->topo();
+}
+
+bool Secao::vazia() const {
+    return pilhaPacotes->vazia();
+}
+
+int Secao::getIdArmazem() const {
+    return id_armazem;
+}
+
+void Secao::setIdArmazem(int id) { 
+    id_armazem = id;
 }

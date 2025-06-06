@@ -24,12 +24,19 @@ private:
 
 class Secao {
 public:
+    Secao();
+    Secao(int id_armazem);
+    ~Secao();
+    void addPacote(Pacote* pacote);
+    Pacote* desempilhar();
+    Pacote* topo();
+    bool vazia() const;
+    int getIdArmazem() const;
+    void setIdArmazem(int id);
     
-
-
 private:
     int id_armazem;
-    PilhaPacotes* pilhaPacotes; // Pilha de pacotes nesta seção
+    PilhaPacotes * pilhaPacotes; // Pilha de pacotes nesta seção
 };
 
 

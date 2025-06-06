@@ -31,7 +31,7 @@ int main(int argc, char **argv)
     }
 
 
-    Armazem * v_armazens = new Armazem[num_armazens]; // cria vetor de armazéns
+    Armazem * v_armazens = new Armazem[num_armazens]; // vetor de armazéns
 
 
     cout << "Criando rede com " << num_armazens << " armazéns..." << endl;
@@ -46,9 +46,9 @@ int main(int argc, char **argv)
             cerr << "Erro ao ler quantidade de arestas para armazém " << i << endl;
             return 1;
         }
-        Armazem a(i, qtdArestas); // cria objeto Armazem
-        v_armazens[i] = a; 
-        
+        v_armazens[i].setId(i);
+        v_armazens[i].setNumDestnPossiveis(qtdArestas); 
+
         cout << "Armazém " << i << " com " << qtdArestas << " conexões..." << endl;
 
         for (int j = 0; j < qtdArestas; j++)
@@ -102,7 +102,7 @@ int main(int argc, char **argv)
         int id= i;
         char remetente[100];
         char destinatario[100];
-        char tipo = '-1';
+        char tipo = 'J';
         int id_armz_orig =-1;
         int id_armz_dest = -1;
         arquivo >> id_armz_orig >> id_armz_dest >> remetente >> destinatario >> tipo;
