@@ -30,16 +30,14 @@ int main(int argc, char **argv)
         return 1;
     }
 
-
-    Armazem * v_armazens = new Armazem[num_armazens]; // vetor de armazéns
-
+    Armazem *v_armazens = new Armazem[num_armazens]; // vetor de armazéns
 
     cout << "Criando rede com " << num_armazens << " armazéns..." << endl;
 
     Rede rede(num_armazens);
     for (int i = 0; i < num_armazens; i++)
     {
-        
+
         int qtdArestas;
         if (!(arquivo >> qtdArestas))
         {
@@ -47,7 +45,7 @@ int main(int argc, char **argv)
             return 1;
         }
         v_armazens[i].setId(i);
-        v_armazens[i].setNumDestnPossiveis(qtdArestas); 
+        v_armazens[i].setNumDestnPossiveis(qtdArestas);
 
         cout << "Armazém " << i << " com " << qtdArestas << " conexões..." << endl;
 
@@ -94,24 +92,29 @@ int main(int argc, char **argv)
 
     cout << "\nQuantidade de pacotes a serem lidos: " << qtdPacotes << endl;
 
-
-
     for (int i = 0; i < qtdPacotes; i++)
-    {   
-        
-        int id= i;
+    { // cria pacotes
+
+        int id = i;
         char remetente[100];
         char destinatario[100];
         char tipo = 'J';
-        int id_armz_orig =-1;
+        int id_armz_orig = -1;
         int id_armz_dest = -1;
         arquivo >> id_armz_orig >> id_armz_dest >> remetente >> destinatario >> tipo;
         Pacote p(id, remetente, destinatario, tipo, id_armz_orig, id_armz_dest);
         p.imprimePacote();
-        
+
+        // armazenar pacotes nos armazéns
+        for (int j = 0; j < num_armazens; j++)
+        {
+            if (v_armazens[j].getId() == p.getOrigem())
+            {
+                v_armazens[j].armazenarPacote(p.getDestino(), &p);
+                cout << "Pacote "<< p.getId()<<" no armazém " << v_armazens[j].getId() << endl;
+            }
+        }
     }
-
-
 
     arquivo.close();
     return 0;

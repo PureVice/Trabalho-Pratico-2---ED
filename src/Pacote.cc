@@ -20,7 +20,12 @@ int Pacote::getId(){
 
     return id;
 }
-
+int Pacote::getOrigem() {
+    return id_armz_orig;
+}
+int Pacote::getDestino()  {
+    return id_armz_dest;
+}
 void Pacote::imprimePacote(){
     std::cout << "id:" << id <<" Remetente: " << remetente <<" Destinatário: " << destinatario << " tipo: "<< tipo << " idOrigem: "
     <<id_armz_orig << " idDestino: "<< id_armz_dest<<std::endl;
