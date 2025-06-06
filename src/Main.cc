@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
 
     cout << "Criando rede com " << num_armazens << " armazéns..." << endl;
     
-    Rede rede;
+    Rede rede(num_armazens);
     for (int i = 0; i < num_armazens; i++) {
         int qtdArestas;
         if (!(arquivo >> qtdArestas)) {
@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
         }
         
         cout << "Armazém " << i << " com " << qtdArestas << " conexões..." << endl;
-        rede.InsereArmazem();
+        
         
         for (int j = 0; j < qtdArestas; j++) {
             int w;
@@ -48,8 +48,8 @@ int main(int argc, char **argv) {
                 return 1;
             }
             cout << "  Conexão com armazém " << w << endl;
-            
-            InsereAresta(&rede, i, w);
+            //i é o armazém atual, w é o armazém conectado
+            rede.InsereAresta( i, w);
         }
     }
     arquivo.close();
