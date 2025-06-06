@@ -19,6 +19,7 @@ void imprimeLista(Lista* inicio);
 void deletaLista(Lista* inicio);
 
 
+
 class Rede {
 private:
     Lista* nos;
@@ -42,5 +43,7 @@ public:
     void ImprimeVizinhos(int v) const;
     Lista* getNos() const { return nos; }
 };
+int* calculaRota(Rede& rede, int origem, int destino, int numArmazens, int& tamanhoRota);
 
+Lista* getVizinhos(Rede& rede, int armazem);
 #endif // REDE_H

@@ -1,8 +1,83 @@
 #include "../include/Rede.h"
+#include "../include/Fila.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstdlib>
 
+
+int* calculaRota(Rede& rede, int origem, int destino, int numArmazens, int& tamanhoRota) {
+    // Arrays para controle do BFS
+    bool* visitados = new bool[numArmazens];
+    int* predecessores = new int[numArmazens];
+    
+    for (int i = 0; i < numArmazens; i++) {
+        visitados[i] = false;
+        predecessores[i] = -1;
+    }
+    
+    Fila fila;
+    fila.enfileirar(origem);
+    visitados[origem] = true;
+    
+    while (!fila.vazia()) {
+        int atual = fila.desenfileirar();
+        
+        if (atual == destino) break;
+        
+        // Obtém vizinhos do armazém atual
+        Lista* vizinhos = getVizinhos(rede, atual);
+        while (vizinhos != nullptr) {
+            int vizinho = vizinhos->valorInteiro;
+            if (!visitados[vizinho]) {
+                visitados[vizinho] = true;
+                predecessores[vizinho] = atual;
+                fila.enfileirar(vizinho);
+            }
+            vizinhos = vizinhos->proximo;
+        }
+    }
+    
+    // Reconstrói a rota
+    int* rota = nullptr;
+    tamanhoRota = 0;
+    
+    if (predecessores[destino] != -1) {
+        // Conta o tamanho da rota
+        int cont = 0;
+        int atual = destino;
+        while (atual != -1) {
+            cont++;
+            atual = predecessores[atual];
+        }
+        
+        tamanhoRota = cont;
+        rota = new int[tamanhoRota];
+        
+        // Preenche a rota na ordem correta
+        atual = destino;
+        for (int i = tamanhoRota - 1; i >= 0; i--) {
+            rota[i] = atual;
+            atual = predecessores[atual];
+        }
+    }
+    
+    delete[] visitados;
+    delete[] predecessores;
+    
+    return rota;
+}
+
+
+Lista* getVizinhos(Rede& rede, int armazem) {
+    Lista* aux = rede.getNos();
+    int c = 0;
+    while (c < armazem && aux != nullptr) {
+        c++;
+        aux = aux->proximo;
+    }
+    if (aux == nullptr) return nullptr;
+    return aux->valorLista;
+}
 Lista* criaLista(TipoVariavel tipo, Lista* valorLista, int valorInteiro) {
   Lista* no = (Lista*)malloc(sizeof(Lista));
 //no = nó 
