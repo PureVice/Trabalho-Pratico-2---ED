@@ -41,7 +41,7 @@ $(OBJ_FOLDER)%.o: $(SRC_FOLDER)%.cc
 
 all: $(OBJ)
 	$(CC) $(CXXFLAGS) -o $(BIN_FOLDER)$(TARGET) $(OBJ)
-	./bin/$(TARGET) 
+	./bin/$(TARGET) teste.txt
 
 
 clean:

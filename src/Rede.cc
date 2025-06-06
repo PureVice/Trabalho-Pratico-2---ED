@@ -220,37 +220,21 @@ void Rede::InsereArmazem() {
     }
 }
 
-void Rede::InsereAresta(int v, int w) {
-    // Função auxiliar para inserção em um vértice específico
-    auto inserirEmVertice = [this](int vertice, int valor) {
-        Lista* aux = this->nos;
-        int c = 0;
-        while(c < vertice) {
-            c++;
-            aux = aux->proximo;
-        }
+void InsereAresta(Rede* g, int v, int w) {
+  Lista* aux = g->getNos();
+  int c = 0;
 
-        if(aux->valorLista == nullptr) {
-            aux->valorLista = criaLista(TIPO_INTEIRO, nullptr, valor);
-        }
-        else {
-            // Verificar se a aresta já existe para não inserir duplicatas
-            Lista* temp = aux->valorLista;
-            while(temp != nullptr) {
-                if(temp->valorInteiro == valor) break;
-                temp = temp->proximo;
-            }
-            if(temp == nullptr) { // Ainda não existe
-                adicionaItem(aux->valorLista, nullptr, valor);
-            }
-        }
-    };
+  while(c < v){
+    c++;
+    aux = aux->proximo;
+  }
 
-    // Inserir w na lista de v
-    inserirEmVertice(v, w);
-    
-    // Inserir v na lista de w (recíproco)
-    inserirEmVertice(w, v);
+  if(aux->valorLista == NULL){
+    aux->valorLista = criaLista(TIPO_INTEIRO, NULL, w);
+  }
+  else{
+    adicionaItem(aux->valorLista, NULL, w);
+  }
 }
 
 void Rede::ImprimeVizinhos(int v) const {

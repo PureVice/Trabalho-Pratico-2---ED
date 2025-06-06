@@ -37,13 +37,13 @@ public:
 
     // Métodos de modificação do rede
     void InsereArmazem();
-    void InsereAresta(int v, int w);
+    
     
     // Método de visualização
     void ImprimeVizinhos(int v) const;
     Lista* getNos() const { return nos; }
 };
 int* calculaRota(Rede& rede, int origem, int destino, int numArmazens, int& tamanhoRota);
-
+void InsereAresta(Rede* g, int v, int w);
 Lista* getVizinhos(Rede& rede, int armazem);
 #endif // REDE_H
