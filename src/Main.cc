@@ -115,7 +115,11 @@ int main(int argc, char **argv)
             }
         }
     }
-
+    cout << "\n\nimpressão dos pacotes armazenados nos armazéns:" << endl;
+    for (int i = 0; i < num_armazens; i++)
+    {
+        Armazem::imprimePacotes(&v_armazens[i]);
+    }
     arquivo.close();
     return 0;
 }

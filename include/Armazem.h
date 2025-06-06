@@ -22,7 +22,7 @@ public:
 
     void setNumDestnPossiveis(int numDestnPossiveis);
     int getNumDestnPossiveis();
-
+    static void imprimePacotes(Armazem * armazem);
 private:
     int id;
     int numDestnPossiveis; // número total de armazéns
