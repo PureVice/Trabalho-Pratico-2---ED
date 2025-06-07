@@ -1,5 +1,5 @@
 #include "Secao.h"
-
+#include <iostream>
 PilhaPacotes::PilhaPacotes() : topoPilha(nullptr) {}
 
 PilhaPacotes::~PilhaPacotes() {
@@ -12,7 +12,6 @@ void PilhaPacotes::empilhar(Pacote* pacote) {
     NoPilha* novo = new NoPilha{pacote, topoPilha};
     topoPilha = novo;
 }
-
 
 Pacote* PilhaPacotes::desempilhar() {
     if (vazia()) return nullptr;
@@ -30,6 +29,22 @@ Pacote* PilhaPacotes::topo() {
 
 bool PilhaPacotes::vazia() const {
     return topoPilha == nullptr;
+}
+void PilhaPacotes::imprimePilha() const {
+    if (vazia()) {
+        //std::cout << "Pilha vazia!" << std::endl;
+        return;
+    }
+    
+    NoPilha* atual = topoPilha;
+    
+    while (atual != nullptr) {       
+        
+        std::cout << " " << atual->pacote->getId();
+        
+        atual = atual->proximo;
+    }
+    std::cout << std::endl;
 }
 
 //SECAO
@@ -60,4 +75,8 @@ int Secao::getIdArmazem() const {
 
 void Secao::setIdArmazem(int id) { 
     id_armazem = id;
+}
+void Secao::imprimeSecao() const {
+    std::cout << "Seção (" << id_armazem << "): ";
+    pilhaPacotes->imprimePilha();
 }

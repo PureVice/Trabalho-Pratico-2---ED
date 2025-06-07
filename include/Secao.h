@@ -16,7 +16,7 @@ public:
     Pacote* desempilhar();
     Pacote* topo();
     bool vazia() const;
-
+    void imprimePilha() const;
 private:
     NoPilha* topoPilha;
     
@@ -33,6 +33,7 @@ public:
     bool vazia() const;
     int getIdArmazem() const;
     void setIdArmazem(int id);
+    void imprimeSecao() const;
     
 private:
     int id_armazem;

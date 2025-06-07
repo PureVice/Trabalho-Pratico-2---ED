@@ -14,15 +14,17 @@ public:
     Armazem(int id, int numDestnPossiveis);
     ~Armazem();
 
-    void armazenarPacote(int destino, Pacote *pacote);
+    void armazenarPacote(Pacote *pacote);
     Pacote *recuperarPacote(int destino);
     bool temPacoteParaDestino(int destino) const;
     void setId(int id);
     int getId();
     Secao *getSecao(int index) { return &secoes[index]; }
+    Secao *getSecoes() { return secoes; }
     void setNumDestnPossiveis(int numDestnPossiveis);
     int getNumDestnPossiveis();
     static void imprimePacotes(Armazem * armazem);
+    void criaSecao(int destino);
 private:
     int id;
     int numDestnPossiveis; // número total de armazéns

@@ -37,7 +37,7 @@ public:
     int QuantidadeArestas() const;
     int GrauMinimo() const;
     int GrauMaximo() const;
-
+    int getNumArmazens() const { return numArmazens; }
     // Imprime os vizinhos de um dado armazém
     void ImprimeVizinhos(int v) const;
     void CriaSecoes(int v, Armazem* armazem);

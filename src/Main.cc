@@ -45,7 +45,7 @@ int main(int argc, char **argv)
             return 1;
         }
         v_armazens[i].setId(i);
-        v_armazens[i].setNumDestnPossiveis(qtdArestas);
+        v_armazens[i].setNumDestnPossiveis(num_armazens);
         
         cout << "Armazém " << i << " com " << qtdArestas << " conexões..." << endl;
 
@@ -98,7 +98,7 @@ int main(int argc, char **argv)
 
     for (int i = 0; i < qtdPacotes; i++)
     { // cria pacotes
-
+        
         int id = i;
         char remetente[100];
         char destinatario[100];
@@ -106,24 +106,26 @@ int main(int argc, char **argv)
         int id_armz_orig = -1;
         int id_armz_dest = -1;
         arquivo >> id_armz_orig >> id_armz_dest >> remetente >> destinatario >> tipo;
-        Pacote p(id, remetente, destinatario, tipo, id_armz_orig, id_armz_dest);
-        p.imprimePacote();
+        Pacote *p = new Pacote(id, remetente, destinatario, tipo, id_armz_orig, id_armz_dest);
+        p->imprimePacote();
 
         // armazenar pacotes nos armazéns
         for (int j = 0; j < num_armazens; j++)
         {
-
-            if (v_armazens[j].getId() == p.getOrigem())
+            Secao * end = v_armazens[j].getSecoes();
+            if (v_armazens[j].getId() == p->getOrigem())
             {
-                v_armazens[j].armazenarPacote(p.getDestino(), &p);
-                cout << "Pacote "<< p.getId()<<" no armazém " << v_armazens[j].getId() << endl;
+                v_armazens[j].armazenarPacote(p);
+                break;
             }
         }
     }
     cout << "\n\nimpressão dos pacotes armazenados nos armazéns:" << endl;
     for (int i = 0; i < num_armazens; i++)
     {
+        cout << "\n\n\n--------------Armazém " << v_armazens[i].getId() << ":" << endl;
         Armazem::imprimePacotes(&v_armazens[i]);
+
     }
     arquivo.close();
     return 0;

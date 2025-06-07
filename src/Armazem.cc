@@ -18,14 +18,49 @@ Armazem::~Armazem()
 {
     delete[] secoes; 
 }
-
-void Armazem::armazenarPacote(int destino, Pacote *pacote)
+void Armazem::criaSecao(int destino)
 {
-    if (destino >= 0 && destino < numDestnPossiveis)
+    int iter = 0;
+  while (true)
+  {
+    
+    if(secoes[iter].getIdArmazem() == -1)
     {
-        secoes[destino].addPacote(pacote);
-        secoes[destino].setIdArmazem(destino); 
+        secoes[iter].setIdArmazem(destino);
+        std::cout << "Criando seção " << destino << " no armazém " << id << std::endl;
+        return;
     }
+    iter++;
+  }
+  
+    
+
+}
+void Armazem::armazenarPacote(Pacote *pacote)
+{
+    int destino = pacote->getDestino();
+    bool adicionado = false;
+    int i;
+    for (i = 0; i < numDestnPossiveis; i++)
+    {
+        if (secoes[i].getIdArmazem() == destino)
+        {
+            secoes[i].addPacote(pacote);
+            adicionado = true;
+            std::cout << "Pacote " << pacote->getId() << " armazenado na seção " << secoes[i].getIdArmazem() << " do armazém " << id << std::endl;
+            return;
+        }        
+        
+    }
+        if (adicionado==false)
+        {
+            criaSecao(destino);
+            secoes[i].addPacote(pacote);
+            std::cout << "Pacote " << pacote->getId() << " armazenado na seção " << secoes[i].getIdArmazem() << " do armazém " << id << std::endl;
+            
+        }
+    
+   
 }
 
 Pacote *Armazem::recuperarPacote(int destino)
@@ -76,16 +111,12 @@ int Armazem::getNumDestnPossiveis()
 
 void Armazem::imprimePacotes(Armazem *armazem) {
     for (int i = 0; i < armazem->numDestnPossiveis; ++i) {
-        std::cout << "Seção " << armazem->secoes[i].getIdArmazem() << " do Armazém " << armazem->id << ": ";
-        if (armazem->secoes[i].vazia()) {
-            std::cout << "Vazia" << std::endl;
-        } else {
-            Pacote *pacote = armazem->secoes[i].topo();
-            while (pacote) {
-                std::cout << pacote->getId() << " ";
-                pacote = armazem->secoes[i].desempilhar(); 
-            }
-            std::cout << std::endl;
+        if (!(armazem->secoes[i].vazia())) {
+            armazem->secoes[i].imprimeSecao();
         }
+ 
+            
+        
+        
     }
 }
