@@ -1,7 +1,7 @@
-#include "Rede.h"
-#include "Fila.h"
-#include "Pacote.h"
-#include "Armazem.h"
+#include "../include/Rede.h"
+#include "../include/Fila.h"
+#include "../include/Pacote.h"
+#include "../include/Armazem.h"
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
         }
         v_armazens[i].setId(i);
         v_armazens[i].setNumDestnPossiveis(qtdArestas);
-
+        
         cout << "Armazém " << i << " com " << qtdArestas << " conexões..." << endl;
 
         for (int j = 0; j < qtdArestas; j++)
@@ -79,13 +79,17 @@ int main(int argc, char **argv)
     cout << "\n=== Teste da Rede ===" << endl;
     cout << "Armazens: " << rede.QuantidadeArmazens() << endl;
     cout << "Arestas: " << rede.QuantidadeArestas() << endl;
-    cout << "Grau minimo: " << rede.GrauMinimo() << endl;
-    cout << "Grau maximo: " << rede.GrauMaximo() << endl;
 
     for (int i = 0; i < num_armazens; i++)
     {
         cout << "Vizinhos do armazem " << i << ": ";
         rede.ImprimeVizinhos(i);
+    }
+
+    // Cria seções para cada armazém
+    for (int i = 0; i < num_armazens; i++)
+    {
+        rede.CriaSecoes(i, &v_armazens[i]);
     }
     int qtdPacotes = 0;
     arquivo >> qtdPacotes;
@@ -108,6 +112,7 @@ int main(int argc, char **argv)
         // armazenar pacotes nos armazéns
         for (int j = 0; j < num_armazens; j++)
         {
+
             if (v_armazens[j].getId() == p.getOrigem())
             {
                 v_armazens[j].armazenarPacote(p.getDestino(), &p);

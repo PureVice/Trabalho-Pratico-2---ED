@@ -19,7 +19,7 @@ public:
     bool temPacoteParaDestino(int destino) const;
     void setId(int id);
     int getId();
-
+    Secao *getSecao(int index) { return &secoes[index]; }
     void setNumDestnPossiveis(int numDestnPossiveis);
     int getNumDestnPossiveis();
     static void imprimePacotes(Armazem * armazem);

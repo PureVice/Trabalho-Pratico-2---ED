@@ -1,5 +1,6 @@
 #include "Rede.h"
-#include "Fila.h" // Assumindo que Fila.h exista e funcione
+#include "Fila.h"
+#include "Armazem.h"
 #include <iostream>
 #include <cstdlib>
 
@@ -103,7 +104,55 @@ void Rede::ImprimeVizinhos(int v) const {
     if (v < 0 || v >= numArmazens) return;
     imprimeLista(adjacencias[v]);
 }
+int* converteListaParaArray(Lista* inicio, int& tamanhoArray_saida) {
+    // 1ª Passagem: Contar o número de inteiros na lista
+    int contador = 0;
+    Lista* aux = inicio;
+    while (aux != nullptr) {
+        if (aux->tipo == TIPO_INTEIRO) {
+            contador++;
+        }
+        aux = aux->proximo;
+    }
 
+    // Define o tamanho de saída e trata o caso de não haver inteiros
+    tamanhoArray_saida = contador;
+    if (contador == 0) {
+        return nullptr;
+    }
+
+    // Alocar memória para o array. O chamador deve liberar com delete[].
+    int* arrayResultado = new int[contador];
+
+    // 2ª Passagem: Preencher o array com os valores
+    aux = inicio; // Reinicia o ponteiro auxiliar para o início da lista
+    int indice = 0;
+    while (aux != nullptr) {
+        if (aux->tipo == TIPO_INTEIRO) {
+            arrayResultado[indice] = aux->valorInteiro;
+            indice++;
+        }
+        aux = aux->proximo;
+    }
+
+    return arrayResultado;
+}
+void Rede::CriaSecoes(int v, Armazem* armazem) {
+    int tam_saida = armazem->getNumDestnPossiveis();
+    if (v < 0 || v >= numArmazens) return;
+    int * arrayVizinhos = converteListaParaArray(adjacencias[v], tam_saida);
+    for (int i = 0; i < tam_saida; i++)
+    {
+        
+        int vizinho_id = arrayVizinhos[i];
+        if (vizinho_id >= 0 && vizinho_id < numArmazens) {
+            armazem->getSecao(i)->setIdArmazem(vizinho_id);
+        } else {
+            std::cerr << "ID de vizinho inválido: " << vizinho_id << std::endl;
+        }
+    }
+    
+}
 
 // ----------------- Funções Auxiliares de Lista (C-style) -----------------
 

@@ -1,5 +1,6 @@
 #ifndef REDE_H
 #define REDE_H
+#include "Armazem.h"
 
 // Enum para o tipo de dado armazenado na lista genérica
 enum TipoVariavel {
@@ -39,7 +40,7 @@ public:
 
     // Imprime os vizinhos de um dado armazém
     void ImprimeVizinhos(int v) const;
-
+    void CriaSecoes(int v, Armazem* armazem);
     // Retorna a lista de adjacências de um armazém (usado pelo BFS)
     Lista* getVizinhos(int v) const;
 };

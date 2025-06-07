@@ -16,8 +16,7 @@ Armazem::Armazem(int id, int numDestnPossiveis) : id(id), numDestnPossiveis(numD
 
 Armazem::~Armazem()
 {
-    delete[] secoes; // Isso já chama destrutores automaticamente
-    // REMOVA o loop manual de destruição!
+    delete[] secoes; 
 }
 
 void Armazem::armazenarPacote(int destino, Pacote *pacote)
