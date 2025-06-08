@@ -113,7 +113,7 @@ int main(int argc, char **argv)
             Secao *end = v_armazens[j].getSecoes();
             if (v_armazens[j].getId() == p->getOrigem())
             {
-                v_armazens[j].armazenarPacote(p, v_armazens[j].getId());
+                v_armazens[j].armazenarPacote(p);
                 break;
             }
         }

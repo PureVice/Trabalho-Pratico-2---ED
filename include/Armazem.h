@@ -14,7 +14,7 @@ public:
     Armazem(int id, int numDestnPossiveis);
     ~Armazem();
 
-    void armazenarPacote(Pacote *pacote, int id_armazem);
+    void armazenarPacote(Pacote *pacote);
     Pacote *recuperarPacote(int destino);
     bool temPacoteParaDestino(int destino) const;
     void setId(int id);

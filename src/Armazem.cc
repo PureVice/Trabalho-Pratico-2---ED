@@ -35,9 +35,9 @@ void Armazem::criaSecao(int destino, int total_armazens)
     }
     return;
 }
-void Armazem::armazenarPacote(Pacote *pacote, int id_armazem)
+void Armazem::armazenarPacote(Pacote *pacote)
 {
-    int destino = pacote->getDestino();
+    int destino = pacote->getProximoSalto();
     bool adicionado = false;
     int i;
     for (i = 0; i < numDestnPossiveis; i++)
