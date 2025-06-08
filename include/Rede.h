@@ -36,10 +36,10 @@ public:
 // --- Funções Auxiliares para Manipulação de Lista (C-style) ---
 // (Mantidas conforme o código original, mas poderiam ser métodos privados/estáticos)
 
-Lista* criaLista(TipoVariavel tipo, Lista* valorLista, int valorInteiro);
-void adicionaItem(Lista* inicio, Lista* valorLista, int valorInteiro);
-void imprimeLista(Lista* inicio);
-void deletaLista(Lista* inicio);
+// Lista* criaLista(TipoVariavel tipo, Lista* valorLista, int valorInteiro);
+// void adicionaItem(Lista* inicio, Lista* valorLista, int valorInteiro);
+// void imprimeLista(Lista* inicio);
+// void deletaLista(Lista* inicio);
 
 // --- Função de Roteamento (BFS) ---
 // A assinatura foi mantida, mas agora opera sobre a nova estrutura de Rede.
