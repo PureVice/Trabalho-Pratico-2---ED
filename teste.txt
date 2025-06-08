@@ -10,9 +10,9 @@
 2 0 5
 2 4 7
 6
-0 3 Alice Karl U
-1 4 Bob Liam N
-2 5 Carol Maria F
-3 6 David Nina P
-4 7 Eve Oscar D
-5 8 Frank Pedro U
+0 3 Alice Karl U 1.0
+1 4 Bob Liam N 2.0
+2 5 Carol Maria F 2.5
+3 6 David Nina P 3.0
+4 7 Eve Oscar D 4.0
+5 8 Frank Pedro U 0.5

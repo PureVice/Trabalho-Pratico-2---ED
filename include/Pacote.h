@@ -11,10 +11,11 @@ private:
     char tipo;
     int id_armz_orig;
     int id_armz_dest;
+    double tempo_chegada; // Tempo de chegada do pacote
     Lista* rota; 
 
 public: 
-    Pacote(int id, const char* remetente, const char* destinatario, char tipo, int id_armz_orig, int id_armz_dest);
+    Pacote(int id, const char* remetente, const char* destinatario, char tipo, int id_armz_orig, int id_armz_dest, double tempo_chegada = 0.0);
     ~Pacote();
 
     int getId() const;

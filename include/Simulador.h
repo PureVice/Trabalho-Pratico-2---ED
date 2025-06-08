@@ -8,16 +8,16 @@
 
 class Simulador {
 public:
-    Simulador(Rede& rede, int numArmazens);
+    Simulador(const char* arquivo); // Construtor que recebe o nome do arquivo de entrada
     ~Simulador();
     
     void executar();
     void carregarDados(const char* arquivo); // Para carregar pacotes de arquivo
     
 private:
-    Rede& rede;
+    Rede* rede;
     int numArmazens;
-    Armazem** armazens;
+    Armazem* armazens;
     Escalonador escalonador;
     double relogio; // Tempo atual da simulação em horas
     
