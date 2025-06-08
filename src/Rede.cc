@@ -219,3 +219,56 @@ int* calculaRota(const Rede& rede, int origem, int destino, int numArmazens, int
 
     return rota; // ATENÇÃO: A responsabilidade de deletar a rota é do chamador!
 }
+
+Lista* calculaRota2(const Rede& rede, int origem, int destino, int numArmazens, int& tamanhoRota) {
+    bool* visitados = new bool[numArmazens];
+    int* predecessores = new int[numArmazens];
+
+    for (int i = 0; i < numArmazens; i++) {
+        visitados[i] = false;
+        predecessores[i] = -1;
+    }
+
+    Fila fila;
+    fila.enfileirar(origem);
+    visitados[origem] = true;
+
+    while (!fila.vazia()) {
+        int atual = fila.desenfileirar();
+        if (atual == destino) break;
+
+        Lista* vizinhos = rede.getVizinhos(atual);
+        while (vizinhos != nullptr) {
+            int vizinho_id = vizinhos->valorInteiro;
+            if (!visitados[vizinho_id]) {
+                visitados[vizinho_id] = true;
+                predecessores[vizinho_id] = atual;
+                fila.enfileirar(vizinho_id);
+            }
+            vizinhos = vizinhos->proximo;
+        }
+    }
+
+    Lista* rotaLista = nullptr;
+    tamanhoRota = 0;
+
+    if (predecessores[destino] != -1) {
+        int atual = destino;
+        // Construir lista encadeada (do destino para a origem)
+        while (atual != -1) {
+            Lista* novoNo = new Lista;
+            novoNo->valorInteiro = atual;
+            novoNo->proximo = rotaLista; // Insere no início
+            rotaLista = novoNo;          // Atualiza cabeça da lista
+            atual = predecessores[atual];
+            tamanhoRota++;
+        }
+    }
+
+    delete[] visitados;
+    delete[] predecessores;
+
+    return rotaLista; // Chamador deve liberar a memória da lista
+}
+#include <iostream>
+

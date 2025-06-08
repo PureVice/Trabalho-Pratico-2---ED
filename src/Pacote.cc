@@ -2,8 +2,9 @@
 #include <cstring>
 #include <iostream>
 
-Pacote::Pacote(int id, const char* remetente, const char* destinatario, char tipo, int id_armz_orig, int id_armz_dest)
-    : id(id), tipo(tipo), id_armz_orig(id_armz_orig), id_armz_dest(id_armz_dest) {
+Pacote::Pacote(int id, const char *remetente, const char *destinatario, char tipo, int id_armz_orig, int id_armz_dest)
+    : id(id), tipo(tipo), id_armz_orig(id_armz_orig), id_armz_dest(id_armz_dest)
+{
     this->remetente = new char[strlen(remetente) + 1];
     strcpy(this->remetente, remetente);
 
@@ -11,23 +12,35 @@ Pacote::Pacote(int id, const char* remetente, const char* destinatario, char tip
     strcpy(this->destinatario, destinatario);
 }
 
-Pacote::~Pacote() {
+Pacote::~Pacote()
+{
     delete[] remetente;
     delete[] destinatario;
 }
-
-int Pacote::getId(){
+void Pacote::setRota(Lista *rota)
+{
+    this->rota = rota;
+}
+int Pacote::getId()
+{
 
     return id;
 }
-int Pacote::getOrigem() {
+int Pacote::getOrigem()
+{
     return id_armz_orig;
 }
-int Pacote::getDestino()  {
+int Pacote::getDestino()
+{
     return id_armz_dest;
 }
-void Pacote::imprimePacote(){
-    std::cout << "id:" << id <<" Remetente: " << remetente <<" Destinatário: " << destinatario << " tipo: "<< tipo << " idOrigem: "
-    <<id_armz_orig << " idDestino: "<< id_armz_dest<<std::endl;
+void Pacote::imprimePacote()
+{
+    std::cout << "id:" << id << " Remetente: " << remetente << " Destinatário: " << destinatario << " tipo: " << tipo << " idOrigem: "
+              << id_armz_orig << " idDestino: " << id_armz_dest << std::endl;
+}
 
+void Pacote::imprimeRota()
+{
+    imprimeRotas(rota);
 }

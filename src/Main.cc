@@ -46,7 +46,7 @@ int main(int argc, char **argv)
         }
         v_armazens[i].setId(i);
         v_armazens[i].setNumDestnPossiveis(num_armazens);
-        
+
         cout << "Armazém " << i << " com " << qtdArestas << " conexões..." << endl;
 
         for (int j = 0; j < qtdArestas; j++)
@@ -93,7 +93,7 @@ int main(int argc, char **argv)
 
     for (int i = 0; i < qtdPacotes; i++)
     { // cria pacotes
-        
+
         int id = i;
         char remetente[100];
         char destinatario[100];
@@ -103,11 +103,14 @@ int main(int argc, char **argv)
         arquivo >> id_armz_orig >> id_armz_dest >> remetente >> destinatario >> tipo;
         Pacote *p = new Pacote(id, remetente, destinatario, tipo, id_armz_orig, id_armz_dest);
         p->imprimePacote();
-
-        // armazenar pacotes nos armazéns
+        int tam_rota = v_armazens[id_armz_orig].getNumDestnPossiveis();
+        Lista *rota = calculaRota2(rede, id_armz_orig, id_armz_dest, num_armazens, tam_rota);
+        p->setRota(rota);
+        cout << "Rota do pacote " << p->getId() << ": ";
+        p->imprimeRota();
         for (int j = 0; j < num_armazens; j++)
         {
-            Secao * end = v_armazens[j].getSecoes();
+            Secao *end = v_armazens[j].getSecoes();
             if (v_armazens[j].getId() == p->getOrigem())
             {
                 v_armazens[j].armazenarPacote(p, v_armazens[j].getId());
@@ -120,7 +123,6 @@ int main(int argc, char **argv)
     {
         cout << "\n\n\n--------------Armazém " << v_armazens[i].getId() << ":" << endl;
         Armazem::imprimePacotes(&v_armazens[i]);
-
     }
     arquivo.close();
     return 0;

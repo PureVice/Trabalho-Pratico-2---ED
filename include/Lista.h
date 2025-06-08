@@ -1,21 +1,23 @@
 #ifndef LISTA_H
 #define LISTA_H
 
-enum TipoVariavel {
+enum TipoVariavel
+{
     TIPO_LISTA,
     TIPO_INTEIRO
 };
 
-struct Lista {
+struct Lista
+{
     int valorInteiro;
-    Lista* valorLista;
+    Lista *valorLista;
     TipoVariavel tipo;
-    Lista* proximo;
+    Lista *proximo;
 };
 
-Lista* criaLista(TipoVariavel tipo, Lista* valorLista, int valorInteiro);
-void adicionaItem(Lista* inicio, Lista* valorLista, int valorInteiro);
-void imprimeLista(Lista* inicio);
-void deletaLista(Lista* inicio);
-
+Lista *criaLista(TipoVariavel tipo, Lista *valorLista, int valorInteiro);
+void adicionaItem(Lista *inicio, Lista *valorLista, int valorInteiro);
+void imprimeLista(Lista *inicio);
+void deletaLista(Lista *inicio);
+void imprimeRotas(Lista *rota);
 #endif // LISTA_H

@@ -4,12 +4,12 @@
 #include "Lista.h"
 // Enum para o tipo de dado armazenado na lista genérica
 
-
-class Rede {
+class Rede
+{
 private:
-    Lista** adjacencias;          // Array de listas de adjacência (acesso O(1))
-    int numArmazens;              // Número de armazéns na rede
-    int capacidade;               // Capacidade máxima do array
+    Lista **adjacencias; // Array de listas de adjacência (acesso O(1))
+    int numArmazens;     // Número de armazéns na rede
+    int capacidade;      // Capacidade máxima do array
 
 public:
     // Construtor agora recebe o total de armazéns para pré-alocar a memória
@@ -28,21 +28,12 @@ public:
     int getNumArmazens() const { return numArmazens; }
     // Imprime os vizinhos de um dado armazém
     void ImprimeVizinhos(int v) const;
-    void CriaSecoes(int v, Armazem* armazem);
+    void CriaSecoes(int v, Armazem *armazem);
     // Retorna a lista de adjacências de um armazém (usado pelo BFS)
-    Lista* getVizinhos(int v) const;
+    Lista *getVizinhos(int v) const;
 };
 
-// --- Funções Auxiliares para Manipulação de Lista (C-style) ---
-// (Mantidas conforme o código original, mas poderiam ser métodos privados/estáticos)
 
-// Lista* criaLista(TipoVariavel tipo, Lista* valorLista, int valorInteiro);
-// void adicionaItem(Lista* inicio, Lista* valorLista, int valorInteiro);
-// void imprimeLista(Lista* inicio);
-// void deletaLista(Lista* inicio);
-
-// --- Função de Roteamento (BFS) ---
-// A assinatura foi mantida, mas agora opera sobre a nova estrutura de Rede.
-int* calculaRota(const Rede& rede, int origem, int destino, int numArmazens, int& tamanhoRota);
-
+int *calculaRota(const Rede &rede, int origem, int destino, int numArmazens, int &tamanhoRota);
+Lista *calculaRota2(const Rede &rede, int origem, int destino, int numArmazens, int &tamanhoRota);
 #endif // REDE_H
