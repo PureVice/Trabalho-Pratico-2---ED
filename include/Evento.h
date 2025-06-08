@@ -1,19 +1,19 @@
 #ifndef EVENTO_H
 #define EVENTO_H
 #include "Pacote.h"
+
 enum TipoEvento {
     CHEGADA_PACOTE,
     TRANSPORTE
 };
 
-
 class Evento {
 public:
-    Evento(double tempo, TipoEvento tipo) : tempo(tempo), tipo(tipo) {}
-    virtual ~Evento() {}
+    Evento(double tempo, TipoEvento tipo);
+    virtual ~Evento();
     
-    double getTempo() const { return tempo; }
-    TipoEvento getTipo() const { return tipo; }
+    double getTempo() const;
+    TipoEvento getTipo() const;
     
 private:
     double tempo; // Tempo em horas desde a referência
@@ -22,11 +22,10 @@ private:
 
 class ChegadaPacoteEvento : public Evento {
 public:
-    ChegadaPacoteEvento(double tempo, Pacote* pacote, int armazem)
-        : Evento(tempo, CHEGADA_PACOTE), pacote(pacote), armazem(armazem) {}
+    ChegadaPacoteEvento(double tempo, Pacote* pacote, int armazem);
     
-    Pacote* getPacote() const { return pacote; }
-    int getArmazem() const { return armazem; }
+    Pacote* getPacote() const;
+    int getArmazem() const;
     
 private:
     Pacote* pacote;
@@ -35,12 +34,11 @@ private:
 
 class TransporteEvento : public Evento {
 public:
-    TransporteEvento(double tempo, int origem, int destino, int capacidade)
-        : Evento(tempo, TRANSPORTE), origem(origem), destino(destino), capacidade(capacidade) {}
+    TransporteEvento(double tempo, int origem, int destino, int capacidade);
     
-    int getOrigem() const { return origem; }
-    int getDestino() const { return destino; }
-    int getCapacidade() const { return capacidade; }
+    int getOrigem() const;
+    int getDestino() const;
+    int getCapacidade() const;
     
 private:
     int origem;
@@ -54,4 +52,5 @@ struct HeapEvento {
     HeapEvento* direita;
     HeapEvento* pai;
 };
+
 #endif // EVENTO_H

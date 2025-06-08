@@ -1,28 +1,31 @@
 #ifndef ESCALONADOR_H
 #define ESCALONADOR_H
-#include "Evento.h"
 
-#include <cstdlib>
-
+#include "Evento.h" // Inclui a definição de Evento
 
 class Escalonador {
 public:
-    Escalonador();
+    Escalonador(int capacidadeInicial = 100); // Construtor com capacidade inicial
     ~Escalonador();
-    
-    void insereEvento(Evento* evento);
-    Evento* retiraProximoEvento();
-    bool vazio() const;
-    
+
+    void Inserir(Evento* ev); // Agora insere um ponteiro para Evento
+    Evento* Remover();        // Agora remove e retorna um ponteiro para Evento
+
+    bool Vazio() const;
+
 private:
-    HeapEvento* raiz;
-    HeapEvento* ultimo;
+    int GetAncestral(int posicao);
+    int GetSucessorEsq(int posicao);
+    int GetSucessorDir(int posicao);
+
+    void HeapifyPorBaixo(int posicao);
+    void HeapifyPorCima(int posicao);
+
+    void redimensionar(); // Para evitar estouro de capacidade
+
     int tamanho;
-    
-    void subir(HeapEvento* no);
-    void descer(HeapEvento* no);
-    HeapEvento* encontrarPaiInsercao();
-    HeapEvento* encontrarUltimo();
+    int capacidade;
+    Evento** data; // O heap agora é um array de ponteiros para Evento
 };
 
-#endif 
+#endif
