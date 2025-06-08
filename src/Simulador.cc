@@ -3,10 +3,15 @@
 #include "Armazem.h"
 #include <iostream>
 #include <fstream>
+#define TEMPO_MANIPULACAO = 1.0
+#define TEMPO_TRANSPORTE = 3.0
 using namespace std;
 Simulador::Simulador(const char *arquivotxt)
-{
+{   
 
+
+    Escalonador escalonador;
+    this->escalonador = escalonador;
     std::ifstream arquivo(arquivotxt);
     if (!arquivo.is_open())
     {
@@ -62,7 +67,7 @@ Simulador::Simulador(const char *arquivotxt)
         return;
     }
 
-    // Teste da this->rede
+    // Teste 
     cout << "\n=== Teste da this->rede ===" << endl;
     cout << "Armazens: " << this->rede->QuantidadeArmazens() << endl;
     cout << "Arestas: " << this->rede->QuantidadeArestas() << endl;
@@ -95,6 +100,16 @@ Simulador::Simulador(const char *arquivotxt)
         p->setRota(rota);
         cout << "Rota do pacote " << p->getId() << ": ";
         p->imprimeRota();
+
+        /* antes inseríamos os pacotes com for, não importava a
+        ordem de chegada, mas agora vamos armazenar os pacotes 
+        de acordo com sua ordem de chegada:
+        1 - criar o pacote
+        2 - calcular a rota
+        3 - criar evento de chegada
+        4 - colocar o evento na fila de eventos
+        
+        */
         for (int j = 0; j < numArmazens; j++)
         {
             Secao *end = armazens[j].getSecoes();
@@ -125,5 +140,7 @@ Simulador::Simulador(const char *arquivotxt)
 
 Simulador::~Simulador()
 {
-    
+  
+    delete[] armazens; // Libera a memória alocada para os armazéns
+
 }

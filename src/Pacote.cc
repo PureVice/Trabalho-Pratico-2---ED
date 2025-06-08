@@ -73,7 +73,7 @@ void Pacote::avancarRota() {
 
 void Pacote::imprimePacote() const {
     std::cout << "id:" << id << " Remetente: " << remetente << " Destinatário: " << destinatario << " tipo: " << tipo << " idOrigem: "
-              << id_armz_orig << " idDestino: " << id_armz_dest << std::endl;
+              << id_armz_orig << " idDestino: " << id_armz_dest << " Chega na origem em: "<<tempo_chegada << " Estado: "<< Estado_Atual << std::endl ;
 }
 
 void Pacote::imprimeRota() const {

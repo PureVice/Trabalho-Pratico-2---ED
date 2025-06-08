@@ -13,6 +13,16 @@ private:
     int id_armz_dest;
     double tempo_chegada; // Tempo de chegada do pacote
     Lista* rota; 
+    enum Estado{
+        
+        NAO_POSTADO,
+        CHEGADA_ESCALONADA,
+        CHEGOU_ARMAZEM,
+        ARMAZENADO,
+        LOCAO_TRANSPORTE,
+        ENTREGUE
+
+    }Estado_Atual = NAO_POSTADO;
 
 public: 
     Pacote(int id, const char* remetente, const char* destinatario, char tipo, int id_armz_orig, int id_armz_dest, double tempo_chegada = 0.0);
