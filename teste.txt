@@ -1,20 +1,62 @@
-8
-3 1 2 4
-2 0 5
-2 0 3
-2 2 4
-4 0 3 5 6
-3 1 4 7
-1 4
-1 5
 10
-0 6 Ana Beatriz U
-1 7 Carlos Daniela F
-3 0 Eduardo Fernanda N
-5 2 Gustavo Helena P
-7 0 Isadora Joao U
-4 1 Karina Leonardo N
-2 6 Mariana Nelson F
-6 1 Olivia Pedro P
-0 5 Ricardo Sofia N
-3 7 Tiago Valentina U
+3 1 2 8
+3 0 3 4
+2 0 5
+2 1 6
+4 1 5 7 9
+3 2 4 8
+2 3 7
+3 4 6 9
+2 0 5
+2 4 7
+50
+0 3 Alice Karl U
+1 4 Bob Liam N
+2 5 Carol Maria F
+3 6 David Nina P
+4 7 Eve Oscar D
+5 8 Frank Pedro U
+6 9 Grace Rosa N
+7 0 Heidi Sofia F
+8 1 Ivan Tiago P
+9 2 Judy Vera D
+0 4 Alice Karl U
+1 5 Bob Liam N
+2 6 Carol Maria F
+3 7 David Nina P
+4 8 Eve Oscar D
+5 9 Frank Pedro U
+6 0 Grace Rosa N
+7 1 Heidi Sofia F
+8 2 Ivan Tiago P
+9 3 Judy Vera D
+0 5 Alice Karl U
+1 6 Bob Liam N
+2 7 Carol Maria F
+3 8 David Nina P
+4 9 Eve Oscar D
+5 0 Frank Pedro U
+6 1 Grace Rosa N
+7 2 Heidi Sofia F
+8 3 Ivan Tiago P
+9 4 Judy Vera D
+0 6 Alice Karl U
+1 7 Bob Liam N
+2 8 Carol Maria F
+3 9 David Nina P
+4 0 Eve Oscar D
+5 1 Frank Pedro U
+6 2 Grace Rosa N
+7 3 Heidi Sofia F
+8 4 Ivan Tiago P
+9 5 Judy Vera D
+0 7 Alice Karl U
+1 8 Bob Liam N
+2 9 Carol Maria F
+3 0 David Nina P
+4 1 Eve Oscar D
+5 2 Frank Pedro U
+6 3 Grace Rosa N
+7 4 Heidi Sofia F
+8 5 Ivan Tiago P
+9 6 Judy Vera D

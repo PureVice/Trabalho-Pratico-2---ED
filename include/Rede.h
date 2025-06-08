@@ -1,21 +1,9 @@
 #ifndef REDE_H
 #define REDE_H
 #include "Armazem.h"
-
+#include "Lista.h"
 // Enum para o tipo de dado armazenado na lista genérica
-enum TipoVariavel {
-    TIPO_LISTA,
-    TIPO_INTEIRO
-};
 
-// Estrutura genérica de nó para listas encadeadas
-// Usada tanto para a lista de armazéns quanto para as listas de adjacência
-struct Lista {
-    int valorInteiro;
-    Lista* valorLista;
-    TipoVariavel tipo;
-    Lista* proximo;
-};
 
 class Rede {
 private:
