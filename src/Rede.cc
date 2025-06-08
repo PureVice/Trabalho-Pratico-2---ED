@@ -137,7 +137,7 @@ int* converteListaParaArray(Lista* inicio, int& tamanhoArray_saida) {
 
     return arrayResultado;
 }
-void Rede::CriaSecoes(int v, Armazem* armazem) {
+void Rede::CriaSecoes(int v, Armazem* armazem) { //v é o ID do armazém
     int tam_saida = armazem->getNumDestnPossiveis();
     if (v < 0 || v >= numArmazens) return;
     int * arrayVizinhos = converteListaParaArray(adjacencias[v], tam_saida);

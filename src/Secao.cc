@@ -70,7 +70,7 @@ bool Secao::vazia() const {
 }
 
 int Secao::getIdArmazem() const {
-    return id_armazem;
+    return id_armazem;//segfault
 }
 
 void Secao::setIdArmazem(int id) { 

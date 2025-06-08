@@ -14,7 +14,7 @@ public:
     Armazem(int id, int numDestnPossiveis);
     ~Armazem();
 
-    void armazenarPacote(Pacote *pacote);
+    void armazenarPacote(Pacote *pacote, int id_armazem);
     Pacote *recuperarPacote(int destino);
     bool temPacoteParaDestino(int destino) const;
     void setId(int id);
@@ -24,7 +24,7 @@ public:
     void setNumDestnPossiveis(int numDestnPossiveis);
     int getNumDestnPossiveis();
     static void imprimePacotes(Armazem * armazem);
-    void criaSecao(int destino);
+    void criaSecao(int destino, int total_armazens);
 private:
     int id;
     int numDestnPossiveis; // número total de armazéns

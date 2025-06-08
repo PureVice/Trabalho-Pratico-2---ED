@@ -86,11 +86,6 @@ int main(int argc, char **argv)
         rede.ImprimeVizinhos(i);
     }
 
-    // Cria seções para cada armazém
-    for (int i = 0; i < num_armazens; i++)
-    {
-        rede.CriaSecoes(i, &v_armazens[i]);
-    }
     int qtdPacotes = 0;
     arquivo >> qtdPacotes;
 
@@ -115,7 +110,7 @@ int main(int argc, char **argv)
             Secao * end = v_armazens[j].getSecoes();
             if (v_armazens[j].getId() == p->getOrigem())
             {
-                v_armazens[j].armazenarPacote(p);
+                v_armazens[j].armazenarPacote(p, v_armazens[j].getId());
                 break;
             }
         }
