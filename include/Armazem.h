@@ -24,11 +24,16 @@ public:
     void setNumDestnPossiveis(int numDestnPossiveis);
     int getNumDestnPossiveis();
     static void imprimePacotes(Armazem * armazem);
-    void criaSecao(int destino, int total_armazens);
+    // The previous creaSecao was problematic. The new findOrCreateSecao is better.
+    // void criaSecao(int destino, int total_armazens); // Remove or keep if still needed elsewhere
+
 private:
     int id;
     int numDestnPossiveis; // número total de armazéns
     Secao *secoes;         // cada seção tem uma pilha
+
+    // Add the declaration for the new helper method here:
+    Secao* findOrCreateSecao(int destino_id);
 };
 
 #endif // ARMAZEM_H

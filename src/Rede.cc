@@ -1,7 +1,6 @@
 #include "Rede.h"
 #include "Fila.h"
-#include "Armazem.h"
-#include "Pacote.h"
+#include "Armazem.h" // Incluído para Pacote (indiretamente via Armazem)
 #include <iostream>
 #include <cstdlib>
 
@@ -38,6 +37,15 @@ void Rede::InsereAresta(int v, int w) {
     if (v < 0 || v >= numArmazens || w < 0 || w >= numArmazens) return;
 
     // Acesso direto em O(1) à lista de adjacência do armazém 'v'
+    // Verifica se 'w' já está na lista para evitar duplicatas em grafo não-direcionado
+    Lista* current = adjacencias[v];
+    while (current != nullptr) {
+        if (current->valorInteiro == w) {
+            return; // Já existe a aresta, não adiciona novamente
+        }
+        current = current->proximo;
+    }
+
     if (adjacencias[v] == nullptr) {
         adjacencias[v] = criaLista(TIPO_INTEIRO, nullptr, w);
     } else {
@@ -105,6 +113,18 @@ void Rede::ImprimeVizinhos(int v) const {
     if (v < 0 || v >= numArmazens) return;
     imprimeLista(adjacencias[v]);
 }
+
+// Esta função não é mais necessária no contexto da Rede, pois Armazem
+// já cuida da inicialização das suas seções com setNumDestnPossiveis.
+// A rede apenas informa as adjacências.
+void Rede::CriaSecoes(int v, Armazem* armazem) {
+    // A lógica de criação de seções do armazém agora está em Armazem::setNumDestnPossiveis
+    // com base no total de armazéns na rede.
+    // Esta função da Rede não é mais relevante para a criação de seções em Armazem.
+    std::cerr << "AVISO: Rede::CriaSecoes() foi chamada, mas não deve ser usada diretamente para inicializar seções do Armazem. Armazem::setNumDestnPossiveis já lida com isso." << std::endl;
+}
+
+// Funções Auxiliares de Lista (C-style) - Mantidas as originais
 int* converteListaParaArray(Lista* inicio, int& tamanhoArray_saida) {
     // 1ª Passagem: Contar o número de inteiros na lista
     int contador = 0;
@@ -138,88 +158,9 @@ int* converteListaParaArray(Lista* inicio, int& tamanhoArray_saida) {
 
     return arrayResultado;
 }
-void Rede::CriaSecoes(int v, Armazem* armazem) { //v é o ID do armazém
-    int tam_saida = armazem->getNumDestnPossiveis();
-    if (v < 0 || v >= numArmazens) return;
-    int * arrayVizinhos = converteListaParaArray(adjacencias[v], tam_saida);
-    for (int i = 0; i < tam_saida; i++)
-    {
-        
-        int vizinho_id = arrayVizinhos[i];
-        if (vizinho_id >= 0 && vizinho_id < numArmazens) {
-            armazem->getSecao(i)->setIdArmazem(vizinho_id);
-        } else {
-            std::cerr << "ID de vizinho inválido: " << vizinho_id << std::endl;
-        }
-    }
-    
-}
-
-// ----------------- Funções Auxiliares de Lista (C-style) -----------------
 
 
-
-
-// ----------------- Função de Cálculo de Rota (BFS) -----------------
-// A lógica interna é a mesma, mas agora usa os métodos eficientes da Rede
-
-int* calculaRota(const Rede& rede, int origem, int destino, int numArmazens, int& tamanhoRota) {
-    bool* visitados = new bool[numArmazens];
-    int* predecessores = new int[numArmazens];
-
-    for (int i = 0; i < numArmazens; i++) {
-        visitados[i] = false;
-        predecessores[i] = -1;
-    }
-
-    Fila fila;
-    fila.enfileirar(origem);
-    visitados[origem] = true;
-
-    while (!fila.vazia()) {
-        int atual = fila.desenfileirar();
-        if (atual == destino) break;
-
-        // Acesso eficiente aos vizinhos
-        Lista* vizinhos = rede.getVizinhos(atual);
-        while (vizinhos != nullptr) {
-            int vizinho_id = vizinhos->valorInteiro;
-            if (!visitados[vizinho_id]) {
-                visitados[vizinho_id] = true;
-                predecessores[vizinho_id] = atual;
-                fila.enfileirar(vizinho_id);
-            }
-            vizinhos = vizinhos->proximo;
-        }
-    }
-
-    int* rota = nullptr;
-    tamanhoRota = 0;
-
-    if (predecessores[destino] != -1) {
-        int cont = 0;
-        int atual = destino;
-        while (atual != -1) {
-            cont++;
-            atual = predecessores[atual];
-        }
-
-        tamanhoRota = cont;
-        rota = new int[tamanhoRota];
-
-        atual = destino;
-        for (int i = tamanhoRota - 1; i >= 0; i--) {
-            rota[i] = atual;
-            atual = predecessores[atual];
-        }
-    }
-
-    delete[] visitados;
-    delete[] predecessores;
-
-    return rota; // ATENÇÃO: A responsabilidade de deletar a rota é do chamador!
-}
-
+// Função de Cálculo de Rota (BFS) - Mantida a original
 Lista* calculaRota2(const Rede& rede, int origem, int destino, int numArmazens, int& tamanhoRota) {
     bool* visitados = new bool[numArmazens];
     int* predecessores = new int[numArmazens];
@@ -252,16 +193,23 @@ Lista* calculaRota2(const Rede& rede, int origem, int destino, int numArmazens, 
     Lista* rotaLista = nullptr;
     tamanhoRota = 0;
 
-    if (predecessores[destino] != -1) {
+    // Reconstrói a rota do destino para a origem e inverte para ter origem -> destino
+    if (predecessores[destino] != -1 || origem == destino) { // Adicionado origem == destino para rotas de 1 nó
         int atual = destino;
         // Construir lista encadeada (do destino para a origem)
         while (atual != -1) {
-            Lista* novoNo = new Lista;
-            novoNo->valorInteiro = atual;
+            Lista* novoNo = criaLista(TIPO_INTEIRO, nullptr, atual); // Usar criaLista
             novoNo->proximo = rotaLista; // Insere no início
             rotaLista = novoNo;          // Atualiza cabeça da lista
             atual = predecessores[atual];
             tamanhoRota++;
+            if (atual == origem) { // Para incluir a origem no início da rota
+                novoNo = criaLista(TIPO_INTEIRO, nullptr, atual);
+                novoNo->proximo = rotaLista;
+                rotaLista = novoNo;
+                tamanhoRota++;
+                break;
+            }
         }
     }
 
@@ -270,6 +218,3 @@ Lista* calculaRota2(const Rede& rede, int origem, int destino, int numArmazens, 
 
     return rotaLista; // Chamador deve liberar a memória da lista
 }
-#include <iostream>
-
-

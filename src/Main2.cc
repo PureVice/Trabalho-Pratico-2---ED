@@ -7,9 +7,9 @@ int main(int argc, char **argv) {
         std::cerr << "Uso: " << argv[0] << " <arquivo_entrada.txt>" << std::endl;
         return 1;
     }
-    Simulador sim(argv[1]);
+    Simulador sim(argv[1]); // Constructor loads data and schedules initial events
    
-    
+    sim.executar(); // Run the simulation
 
     std::cout << "Simulacao concluida." << std::endl;
 

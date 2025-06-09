@@ -34,6 +34,5 @@ public:
 };
 
 
-int *calculaRota(const Rede &rede, int origem, int destino, int numArmazens, int &tamanhoRota);
 Lista *calculaRota2(const Rede &rede, int origem, int destino, int numArmazens, int &tamanhoRota);
 #endif // REDE_H

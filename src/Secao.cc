@@ -1,5 +1,8 @@
-#include "Secao.h"
+#include "../include/Secao.h" // Include its own header first
 #include <iostream>
+// No other includes related to Rede, Fila, etc. should be here
+
+// PilhaPacotes implementations
 PilhaPacotes::PilhaPacotes() : topoPilha(nullptr) {}
 
 PilhaPacotes::~PilhaPacotes() {
@@ -30,6 +33,7 @@ Pacote* PilhaPacotes::topo() {
 bool PilhaPacotes::vazia() const {
     return topoPilha == nullptr;
 }
+
 void PilhaPacotes::imprimePilha() const {
     if (vazia()) {
         //std::cout << "Pilha vazia!" << std::endl;
@@ -47,12 +51,16 @@ void PilhaPacotes::imprimePilha() const {
     std::cout << std::endl;
 }
 
-//SECAO
+// SECAO implementations
 Secao::Secao() : id_armazem(-1), pilhaPacotes(new PilhaPacotes()) {}
 Secao::Secao(int id_armazem) : id_armazem(id_armazem), pilhaPacotes(new PilhaPacotes()) {}
+
 Secao::~Secao() {
-    delete []pilhaPacotes;
+    // Correctly delete the dynamically allocated PilhaPacotes object.
+    // The previous `delete []pilhaPacotes;` was incorrect as it's a single object, not an array.
+    delete pilhaPacotes; 
 }
+
 void Secao::addPacote(Pacote* pacote) {
     pilhaPacotes->empilhar(pacote);
 }
@@ -70,12 +78,13 @@ bool Secao::vazia() const {
 }
 
 int Secao::getIdArmazem() const {
-    return id_armazem;//segfault
+    return id_armazem;
 }
 
 void Secao::setIdArmazem(int id) { 
     id_armazem = id;
 }
+
 void Secao::imprimeSecao() const {
     std::cout << "Seção (" << id_armazem << "): ";
     pilhaPacotes->imprimePilha();
