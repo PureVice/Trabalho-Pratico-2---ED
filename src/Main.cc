@@ -1,41 +1,20 @@
-
+#include "../include/Simulador.h"
 #include <iostream>
-#include <cstdlib>
-#include <fstream>
-#include "Rede.h"
 
-
-using namespace std;
-int main(int argc, char **argv)
-{
-
-    if (freopen(argv[1], "r", stdin) == nullptr)
-    {
-        cerr << "erro ao abrir o arquivo! " << argv[1] << std::endl;
-        return 1;
+// Ponto de entrada do programa.
+int main(int argc, char **argv) {
+    // Verifica se o argumento da linha de comando (arquivo de entrada) foi fornecido.
+    if (argc < 2) {
+        std::cerr << "ERRO: Arquivo de entrada não especificado." << std::endl;
+        std::cerr << "Uso: " << argv[0] << " <arquivo_de_entrada.txt>" << std::endl;
+        return 1; // Retorna um código de erro.
     }
-    int num_armazens;
-    cin >> num_armazens;
-    Rede *g = new Rede();
 
-    for (int i = 0; i < num_armazens; i++)
-    {
-        int qtdArestas;
-        cin >> qtdArestas;
+    // Cria o objeto Simulador. O construtor já carrega os dados do arquivo.
+    Simulador sim(argv[1]);
+   
+    // Executa a simulação.
+    sim.executar();
 
-        g->InsereArmazem(g);
-        for (int j = 0; j < qtdArestas; j++)
-        {
-            int w; //i é o armazém atual, w é o armazém vizinho
-            cin >> w;
-            g->InsereAresta(i, w);
-        }
-    }
-    for (int i = 0; i < num_armazens; i++)
-    {
-        cout << "Armazém " << i << ": ";
-        //g->ImprimeVizinhos(i);
-    }
-    delete g;
-    return 0;
+    return 0; // Termina com sucesso.
 }

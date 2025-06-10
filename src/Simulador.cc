@@ -1,275 +1,203 @@
-#include "Simulador.h"
-#include "Rede.h"
-#include "cstdlib"
-#include <string>
-
-template<typename T>
-void swap(T& a, T& b) {
-    T temp = a;
-    a = b;
-    b = temp;
-}
-
-Escalonador::Escalonador() : raiz(nullptr), ultimo(nullptr), tamanho(0) {}
-
-Escalonador::~Escalonador() {
-    // Implementar liberação de memória da heap
-}
-
-void Escalonador::subir(HeapEvento* no) {
-    while (no->pai && no->evento->getTempo() < no->pai->evento->getTempo()) {
-        swap(no->evento, no->pai->evento);
-        no = no->pai;
-    }
-}
-
-// Descer na heap (heapify-down)
-void Escalonador::descer(HeapEvento* no) {
-    while (true) {
-        HeapEvento* menor = no;
-        if (no->esquerda && no->esquerda->evento->getTempo() < menor->evento->getTempo()) {
-            menor = no->esquerda;
-        }
-        if (no->direita && no->direita->evento->getTempo() < menor->evento->getTempo()) {
-            menor = no->direita;
-        }
-        if (menor == no) break;
-        swap(no->evento, menor->evento);
-        no = menor;
-    }
-}
-
-// Encontrar o nó pai onde o próximo nó será inserido (BFS reverso simulada)
-HeapEvento* Escalonador::encontrarPaiInsercao() {
-    // Converte o tamanho+1 em caminho binário e percorre para achar o pai
-    int pos = tamanho + 1;
-    std::string caminho;
-    while (pos > 1) {
-        caminho = (pos % 2 == 0 ? 'L' : 'R') + caminho;
-        pos /= 2;
-    }
-    HeapEvento* atual = raiz;
-    for (int i = 0; i < (int)caminho.length() - 1; i++) {
-        if (caminho[i] == 'L') atual = atual->esquerda;
-        else atual = atual->direita;
-    }
-    return atual;
-}
-
-// Encontrar o novo último nó após remoção (caminho binário reverso)
-HeapEvento* Escalonador::encontrarUltimo() {
-    int pos = tamanho;
-    std::string caminho;
-    while (pos > 1) {
-        caminho = (pos % 2 == 0 ? 'L' : 'R') + caminho;
-        pos /= 2;
-    }
-    HeapEvento* atual = raiz;
-    for (char c : caminho) {
-        if (c == 'L') atual = atual->esquerda;
-        else atual = atual->direita;
-    }
-    return atual;
-}
-
-void Escalonador::insereEvento(Evento* evento) {
-    HeapEvento* novo = new HeapEvento{evento, nullptr, nullptr, nullptr};
-    
-    if (raiz == nullptr) {
-        raiz = ultimo = novo;
-        tamanho++;
-        return;
-    }
-    
-    HeapEvento* pai = encontrarPaiInsercao();
-    novo->pai = pai;
-    
-    if (pai->esquerda == nullptr) {
-        pai->esquerda = novo;
-    } else {
-        pai->direita = novo;
-    }
-    
-    ultimo = novo;
-    tamanho++;
-    subir(novo);
-}
-
-Evento* Escalonador::retiraProximoEvento() {
-    if (raiz == nullptr) return nullptr;
-    
-    Evento* proximo = raiz->evento;
-    if (tamanho == 1) {
-        delete raiz;
-        raiz = ultimo = nullptr;
-        tamanho = 0;
-        return proximo;
-    }
-    
-    // Troca raiz com último
-    raiz->evento = ultimo->evento;
-    
-    // Remove último
-    HeapEvento* paiUltimo = ultimo->pai;
-    if (paiUltimo->direita == ultimo) {
-        paiUltimo->direita = nullptr;
-    } else {
-        paiUltimo->esquerda = nullptr;
-    }
-    
-    delete ultimo;
-    tamanho--;
-    
-    // Atualiza último
-    ultimo = encontrarUltimo();
-    
-    // Ajusta heap
-    descer(raiz);
-    
-    return proximo;
-}
-
-bool Escalonador::vazio() const {
-    return tamanho == 0;
-}
-
-// Implementar métodos auxiliares...
-
-#include "Simulador.h"
+#include "../include/Simulador.h"
 #include <iostream>
 #include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <cmath>
 
-Simulador::Simulador(Rede& rede, int numArmazens) 
-    : rede(rede), numArmazens(numArmazens), relogio(0) {
-    
-    // Inicializar armazéns
-    armazens = new Armazem*[numArmazens];
-    for (int i = 0; i < numArmazens; i++) {
-        armazens[i] = new Armazem(i, numArmazens);
-    }
+// --- Implementação da Classe Simulador ---
+
+Simulador::Simulador(const char* arquivoEntrada) {
+    this->rede = nullptr;
+    this->armazens = nullptr;
+    this->relogio = 0.0;
+    this->pacotesAtivos = 0;
+    this->logSaida = new Lista();
+    carregarDados(arquivoEntrada);
 }
 
 Simulador::~Simulador() {
-    for (int i = 0; i < numArmazens; i++) {
-        delete armazens[i];
-    }
-    delete[] armazens;
-}
-
-void Simulador::carregarDados(const char* arquivo) {
-    
-}
-
-void Simulador::inicializarTransportes() {
-    // Para cada ligação entre armazéns (aresta)
-    Lista* no = rede.getNos();
-    for (int i = 0; i < numArmazens; i++) {
-        Lista* vizinhos = no->valorLista;
-        while (vizinhos != nullptr) {
-            int destino = vizinhos->valorInteiro;
-            if (i < destino) { // Evitar duplicatas
-                // Capacidade e frequência fixas para simplificação
-                TransporteEvento* evento = new TransporteEvento(relogio, i, destino, 10);
-                escalonador.insereEvento(evento);
-            }
-            vizinhos = vizinhos->proximo;
+    delete rede;
+    if (armazens != nullptr) {
+        for (int i = 0; i < numArmazens; ++i) {
+            delete armazens[i];
         }
-        no = no->proximo;
+        delete[] armazens;
     }
+    delete logSaida;
+}
+
+void Simulador::carregarDados(const char* arquivoEntrada) {
+    std::ifstream arquivo(arquivoEntrada);
+    if (!arquivo.is_open()) {
+        std::cerr << "ERRO: Não foi possível abrir o arquivo de entrada: " << arquivoEntrada << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    arquivo >> capacidadeTransporte;
+    arquivo >> latenciaTransporte;
+    arquivo >> intervaloTransportes;
+    arquivo >> custoRemocao;
+
+    arquivo >> numArmazens;
+    this->rede = new Rede(numArmazens);
+    this->armazens = new Armazem*[numArmazens];
+    for (int i = 0; i < numArmazens; ++i) {
+        armazens[i] = new Armazem(i, numArmazens);
+        for (int j = 0; j < numArmazens; ++j) {
+            int conectado;
+            arquivo >> conectado;
+            if (conectado == 1) {
+                rede->InsereAresta(i, j);
+            }
+        }
+    }
+    
+    int numPacotes;
+    arquivo >> numPacotes;
+    this->pacotesAtivos = numPacotes;
+    for (int i = 0; i < numPacotes; ++i) {
+        double tempoPostagem;
+        int idPacote, idOrigem, idDestino;
+        std::string pac_str, org_str, dst_str; 
+        arquivo >> tempoPostagem >> pac_str >> idPacote >> org_str >> idOrigem >> dst_str >> idDestino;
+
+        Pacote* p = new Pacote(idPacote, idOrigem, idDestino, tempoPostagem);
+        p->setRota(calculaRota(*rede, idOrigem, idDestino));
+        p->setEstado(Pacote::CHEGADA_AGENDADA);
+        Evento* ev = new ChegadaPacoteEvento(tempoPostagem, p, idOrigem);
+        escalonador.Inserir(ev);
+    }
+    arquivo.close();
 }
 
 void Simulador::executar() {
     inicializarTransportes();
-    
-    while (!escalonador.vazio()) {
-        Evento* evento = escalonador.retiraProximoEvento();
-        relogio = evento->getTempo();
-        
-        switch (evento->getTipo()) {
-            case CHEGADA_PACOTE:
-                processarChegadaPacote(static_cast<ChegadaPacoteEvento*>(evento));
-                break;
-            case TRANSPORTE:
-                processarTransporte(static_cast<TransporteEvento*>(evento));
-                break;
+    while (!escalonador.Vazio() && pacotesAtivos > 0) {
+        Evento* proximoEvento = escalonador.Remover();
+        // O relógio só avança se o tempo do evento for futuro.
+        if (proximoEvento->getTempo() > relogio) {
+            relogio = proximoEvento->getTempo();
         }
-        
-        delete evento;
+        if (proximoEvento->getTipo() == CHEGADA_PACOTE) {
+            processarChegadaPacote(static_cast<ChegadaPacoteEvento*>(proximoEvento));
+        } else if (proximoEvento->getTipo() == TRANSPORTE) {
+            processarTransporte(static_cast<TransporteEvento*>(proximoEvento));
+        }
+        delete proximoEvento;
+    }
+    imprimirLogs();
+}
+
+void Simulador::inicializarTransportes() {
+    for (int i = 0; i < numArmazens; ++i) {
+        Lista* vizinhos = rede->getVizinhos(i);
+        Celula* atual = vizinhos->getInicio();
+        while(atual != nullptr) {
+            int vizinhoId = atual->valorInteiro;
+            if (i < vizinhoId) {
+                Evento* ev = new TransporteEvento(intervaloTransportes, i, vizinhoId);
+                escalonador.Inserir(ev);
+                Evento* ev_rev = new TransporteEvento(intervaloTransportes, vizinhoId, i);
+                escalonador.Inserir(ev_rev);
+            }
+            atual = atual->proximo;
+        }
     }
 }
 
 void Simulador::processarChegadaPacote(ChegadaPacoteEvento* evento) {
     Pacote* pacote = evento->getPacote();
-    int armazem = evento->getArmazem();
+    int armazemId = evento->getArmazemChegada();
     
-    if (armazem == pacote->getDestino()) {
+    if (armazemId == pacote->getDestino()) {
         pacote->setEstado(Pacote::ENTREGUE);
-        pacote->registrarTempoEntrega(relogio);
+        registrarLog(evento->getTempo(), pacote->getId(), "entregue em " + formatarId(armazemId, 3));
+        pacotesAtivos--;
+        delete pacote;
     } else {
-        int proximo = pacote->getProximoArmazemRota();
-        armazens[armazem]->armazenarPacote(proximo, pacote, relogio);
-        pacote->setEstado(Pacote::ARMAZENADO);
-        pacote->avancarRota();
+        armazens[armazemId]->armazenarPacote(pacote);
+        registrarLog(evento->getTempo(), pacote->getId(), "armazenado em " + formatarId(armazemId, 3) + " na secao " + formatarId(pacote->getProximoSalto(), 3));
     }
+}
+
+bool compararPacotes(Pacote* a, Pacote* b) {
+    return a->getTempoPostagem() < b->getTempoPostagem();
 }
 
 void Simulador::processarTransporte(TransporteEvento* evento) {
-    int origem = evento->getOrigem();
-    int destino = evento->getDestino();
-    int capacidade = evento->getCapacidade();
-    
-    // Recuperar pacotes da seção correspondente
-    PilhaPacotes* secao = armazens[origem]->getSecao(destino);
-    if (!secao || secao->vazia()) {
-        // Reagendar transporte se não houver pacotes
-        TransporteEvento* novoEvento = new TransporteEvento(
-            relogio + 1.0, // Frequência de 1 hora
-            origem,
-            destino,
-            capacidade
-        );
-        escalonador.insereEvento(novoEvento);
+    int origemId = evento->getOrigem();
+    int destinoId = evento->getDestino();
+
+    Secao* secao = armazens[origemId]->getSecaoPorDestino(destinoId);
+    if (secao == nullptr || secao->estaVazia()) {
+        Evento* proximoTransporte = new TransporteEvento(relogio + intervaloTransportes, origemId, destinoId);
+        escalonador.Inserir(proximoTransporte);
         return;
     }
+
+    PilhaPacotes* pilha = secao->getPilha();
+    int numPacotesNaSecao = pilha->getTamanho();
+    Pacote** pacotesNaSecao = pilha->getPacotes();
+    std::sort(pacotesNaSecao, pacotesNaSecao + numPacotesNaSecao, compararPacotes);
+    int pacotesATransportarCount = std::min(numPacotesNaSecao, capacidadeTransporte);
+    std::vector<Pacote*> pacotesSelecionados(pacotesNaSecao, pacotesNaSecao + pacotesATransportarCount);
     
-    // Remover pacotes até a capacidade do transporte
-    int cont = 0;
-    while (cont < capacidade && !secao->vazia()) {
-        Pacote* pacote = secao->desempilhar();
-        pacote->setEstado(Pacote::ALOCADO_TRANSPORTE);
+    double tempoDaOperacao = relogio + 1.0; 
+    PilhaPacotes pilhaTemporaria;
+    
+    while(!pilha->vazia()) {
+        Pacote* pacoteDoTopo = pilha->desempilhar();
+        tempoDaOperacao += custoRemocao;
+        registrarLog(tempoDaOperacao, pacoteDoTopo->getId(), "removido de " + formatarId(origemId, 3) + " na secao " + formatarId(destinoId, 3));
         
-        // Calcular tempo de viagem (fixo em 2 horas para simplificação)
-        double tempoChegada = relogio + 2.0;
-        
-        // Escalonar chegada no próximo armazém
-        ChegadaPacoteEvento* novoEvento = new ChegadaPacoteEvento(
-            tempoChegada,
-            pacote,
-            destino
-        );
-        escalonador.insereEvento(novoEvento);
-        cont++;
+        bool transportarEste = false;
+        for(size_t i=0; i<pacotesSelecionados.size(); ++i) {
+            if(pacotesSelecionados[i] == pacoteDoTopo) {
+                transportarEste = true;
+                break;
+            }
+        }
+        if(transportarEste) {
+            // *** CORREÇÃO DO LOOP INFINITO ESTÁ AQUI ***
+            // Avançamos a rota do pacote no momento da saída.
+            pacoteDoTopo->avancarRota();
+            
+            pacoteDoTopo->setEstado(Pacote::EM_TRANSITO);
+            registrarLog(tempoDaOperacao, pacoteDoTopo->getId(), "em transito de " + formatarId(origemId, 3) + " para " + formatarId(destinoId, 3));
+            Evento* chegadaEv = new ChegadaPacoteEvento(tempoDaOperacao + latenciaTransporte, pacoteDoTopo, destinoId);
+            escalonador.Inserir(chegadaEv);
+        } else {
+            pilhaTemporaria.empilhar(pacoteDoTopo);
+        }
     }
     
-    // Reagendar próximo transporte
-    TransporteEvento* novoEvento = new TransporteEvento(
-        relogio + 1.0, // Frequência de 1 hora
-        origem,
-        destino,
-        capacidade
-    );
-    escalonador.insereEvento(novoEvento);
+    while(!pilhaTemporaria.vazia()) {
+        Pacote* pacoteParaRearmazenar = pilhaTemporaria.desempilhar();
+        pilha->empilhar(pacoteParaRearmazenar);
+        registrarLog(tempoDaOperacao, pacoteParaRearmazenar->getId(), "rearmazenado em " + formatarId(origemId, 3) + " na secao " + formatarId(destinoId, 3));
+    }
+
+    Evento* proximoTransporte = new TransporteEvento(relogio + intervaloTransportes, origemId, destinoId);
+    escalonador.Inserir(proximoTransporte);
+    
+    delete[] pacotesNaSecao;
 }
 
-void Simulador::calcularERegistrarRota(Pacote* pacote) {
-    int origem = pacote->getOrigem();
-    int destino = pacote->getDestino();
-    int tamanhoRota;
-    
-    // Calcular rota usando BFS (já implementado anteriormente)
+void Simulador::registrarLog(double tempo, int idPacote, const std::string& mensagem) {
+    std::ostringstream oss;
+    oss << std::setw(7) << std::setfill('0') << static_cast<int>(round(tempo)) << " pacote " << formatarId(idPacote, 3) << " " << mensagem;
+    logSaida->adicionaString(oss.str());
+}
 
-    int* rota = rede.calculaRota(rede, origem, destino, numArmazens, tamanhoRota);
-    
-    // Armazenar rota no pacote
-    pacote->setRota(rota, tamanhoRota);
+void Simulador::imprimirLogs() {
+    logSaida->imprime();
+}
+
+std::string Simulador::formatarId(int id, int largura) {
+    std::ostringstream oss;
+    oss << std::setw(largura) << std::setfill('0') << id;
+    return oss.str();
 }

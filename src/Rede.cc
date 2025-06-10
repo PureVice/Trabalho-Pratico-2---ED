@@ -1,307 +1,113 @@
 #include "../include/Rede.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <cstdlib>
+#include "../include/Fila.h"
+#include <iostream>
+#include <vector> // Usado temporariamente para inverter a rota.
+#include <algorithm> // Para std::reverse
 
-Lista* Rede::criaLista(TipoVariavel tipo, Lista* valorLista, int valorInteiro) {
-  Lista* no = (Lista*)malloc(sizeof(Lista));
-//no = nó 
-  no->valorInteiro = valorInteiro;
-  no->valorLista = valorLista;
-  no->tipo = tipo;
-  no->proximo = NULL;
-  return no;
-}
+// --- Implementação da Classe Rede ---
 
-void Rede::adicionaItem(Lista* inicio, Lista* valorLista, int valorInteiro) {
-  Lista* novoNo = criaLista(inicio->tipo, valorLista, valorInteiro);
-  Lista* aux = inicio;
-  while(aux->proximo != NULL){
-    aux = aux->proximo;
-  }
-  aux->proximo = novoNo;
-}
-
-void Rede::imprimeLista(Lista* inicio) {
-  Lista* aux = inicio;
-  while (aux != NULL) {
-    if(aux->tipo == TIPO_LISTA){
-      imprimeLista(aux->valorLista);
+Rede::Rede(int numArmazens) : numArmazens(numArmazens) {
+    adjacencias = new Lista*[numArmazens];
+    for (int i = 0; i < numArmazens; ++i) {
+        adjacencias[i] = new Lista();
     }
-    else if(aux->tipo == TIPO_INTEIRO){
-      printf("%d ", aux->valorInteiro);
-    }
-    aux = aux->proximo;
-  }
-  printf("\n");
-}
-void Rede::deletaLista(Lista* inicio) {
-  if(inicio->proximo != NULL){
-    deletaLista(inicio->proximo);  
-  }
-  if(inicio->tipo == TIPO_LISTA && inicio->valorLista != NULL){
-    deletaLista(inicio->valorLista);
-  }
-  free(inicio);
-}
-
-
-
-Rede::Rede() : nos(nullptr) {
 }
 
 Rede::~Rede() {
-    if(nos != nullptr) {
-        deletaLista(nos);
+    for (int i = 0; i < numArmazens; ++i) {
+        delete adjacencias[i];
     }
-}
-
-int Rede::QuantidadeArmazens(Rede* rede) {
-    int c = 0;
-    Lista* aux = rede->nos;
-    while (aux != nullptr) {
-        c++;
-        aux = aux->proximo;
-    }
-    return c;
-}
-
-int Rede::QuantidadeArestas(Rede* rede) {
-    int numArestas = 0;
-    int count = 0;
-    Lista* aux = rede->nos;
-
-    while(aux != nullptr) {
-        Lista* no = aux->valorLista;
-        while (no != nullptr) {
-            numArestas++;
-            no = no->proximo;
-        }
-        aux = aux->proximo;
-        count++;
-    }
-
-    return numArestas/2;
-}
-
-int Rede::GrauMinimo(Rede* rede) {
-    int grauMin = 0;
-    int count = 0;
-    Lista* aux = rede->nos;
-
-    while(aux != nullptr) {
-        Lista* no = aux->valorLista;
-        int numArestas = 0;
-
-        while (no != nullptr) {
-            numArestas++;
-            if(count != 0 && numArestas > grauMin) {
-                break;
-            }
-            no = no->proximo;
-        }
-
-        if(count == 0 || grauMin > numArestas) {
-            count++;
-            grauMin = numArestas;
-        }
-        aux = aux->proximo;
-    }
-    return grauMin;
-}
-
-int Rede::GrauMaximo(Rede* rede) {
-    int grauMax = 0;
-    int count = 0;
-    Lista* aux = rede->nos;
-
-    while(aux != nullptr) {
-        Lista* no = aux->valorLista;
-        int numArestas = 0;
-
-        while (no != nullptr) {
-            numArestas++;
-            no = no->proximo;
-        }
-
-        if(count == 0 || numArestas > grauMax) {
-            count++;
-            grauMax = numArestas;
-        }
-        aux = aux->proximo;
-    }
-
-    return grauMax;
-}
-
-void Rede::InsereArmazem(Rede* rede) {
-    int v = QuantidadeArmazens(rede);
-
-    if(rede->nos == nullptr) {
-        rede->nos = criaLista(TIPO_LISTA, nullptr, v);
-    }
-    else {
-        adicionaItem(rede->nos, nullptr, v);
-    }
+    delete[] adjacencias;
 }
 
 void Rede::InsereAresta(int v, int w) {
-    // Função auxiliar para inserção em um vértice específico
-    auto inserirEmVertice = [this](int vertice, int valor) {
-        Lista* aux = this->nos;
-        int c = 0;
-        while(c < vertice) {
-            c++;
-            aux = aux->proximo;
-        }
-
-        if(aux->valorLista == nullptr) {
-            aux->valorLista = criaLista(TIPO_INTEIRO, nullptr, valor);
-        }
-        else {
-            // Verificar se a aresta já existe para não inserir duplicatas
-            Lista* temp = aux->valorLista;
-            while(temp != nullptr) {
-                if(temp->valorInteiro == valor) break;
-                temp = temp->proximo;
-            }
-            if(temp == nullptr) { // Ainda não existe
-                adicionaItem(aux->valorLista, nullptr, valor);
-            }
-        }
-    };
-
-    // Inserir w na lista de v
-    inserirEmVertice(v, w);
-    
-    // Inserir v na lista de w (recíproco)
-    inserirEmVertice(w, v);
+    if (v < 0 || v >= numArmazens || w < 0 || w >= numArmazens) return;
+    adjacencias[v]->adicionaInteiro(w);
 }
 
-void Rede::ImprimeVizinhos(int v) {
-    Lista* aux = nos;
-    int c = 0;
-    while(c < v) {
-        c++;
-        aux = aux->proximo;
-    }
-    imprimeLista(aux->valorLista);
+Lista* Rede::getVizinhos(int v) const {
+    if (v < 0 || v >= numArmazens) return nullptr;
+    return adjacencias[v];
 }
 
-struct NoFila {
-    int valor;
-    NoFila* proximo;
-};
-
-class Fila {
-private:
-    NoFila* frente;
-    NoFila* tras;
-public:
-    Fila() : frente(nullptr), tras(nullptr) {}
-    
-    void enfileirar(int valor) {
-        NoFila* novo = new NoFila{valor, nullptr};
-        if (tras) {
-            tras->proximo = novo;
-        } else {
-            frente = novo;
-        }
-        tras = novo;
-    }
-    
-    int desenfileirar() {
-        if (frente == nullptr) return -1;
-        NoFila* temp = frente;
-        int valor = temp->valor;
-        frente = frente->proximo;
-        if (frente == nullptr) tras = nullptr;
-        delete temp;
-        return valor;
-    }
-    
-    bool vazia() const {
-        return frente == nullptr;
-    }
-    
-    ~Fila() {
-        while (!vazia()) {
-            desenfileirar();
-        }
-    }
-};
-
-// Função auxiliar para obter vizinhos de um armazém
-Lista* getVizinhos(Rede& rede, int armazem) {
-    Lista* aux = rede.getNos();
-    int c = 0;
-    while (c < armazem && aux != nullptr) {
-        c++;
-        aux = aux->proximo;
-    }
-    if (aux == nullptr) return nullptr;
-    return aux->valorLista;
+int Rede::getNumArmazens() const {
+    return numArmazens;
 }
 
-// Função para calcular rota usando BFS
-int* Rede::calculaRota(Rede& rede, int origem, int destino, int numArmazens, int& tamanhoRota) {
-    // Arrays para controle do BFS
+void Rede::Imprime() const {
+    std::cout << "--- Topologia da Rede ---" << std::endl;
+    for (int i = 0; i < numArmazens; ++i) {
+        std::cout << "Armazem " << i << " -> ";
+        adjacencias[i]->imprime();
+    }
+    std::cout << "-------------------------" << std::endl;
+}
+
+// --- Implementação da Função calculaRota (BFS) ---
+
+Lista* calculaRota(const Rede& rede, int origem, int destino) {
+    int numArmazens = rede.getNumArmazens();
+    Lista* rota = new Lista();
+    
+    if (origem == destino) {
+        rota->adicionaInteiro(origem);
+        return rota;
+    }
+
     bool* visitados = new bool[numArmazens];
     int* predecessores = new int[numArmazens];
-    
+
     for (int i = 0; i < numArmazens; i++) {
         visitados[i] = false;
         predecessores[i] = -1;
     }
-    
+
     Fila fila;
     fila.enfileirar(origem);
     visitados[origem] = true;
-    
-    while (!fila.vazia()) {
+
+    bool destinoEncontrado = false;
+    while (!fila.vazia() && !destinoEncontrado) {
         int atual = fila.desenfileirar();
         
-        if (atual == destino) break;
-        
-        // Obtém vizinhos do armazém atual
-        Lista* vizinhos = getVizinhos(rede, atual);
-        while (vizinhos != nullptr) {
-            int vizinho = vizinhos->valorInteiro;
-            if (!visitados[vizinho]) {
-                visitados[vizinho] = true;
-                predecessores[vizinho] = atual;
-                fila.enfileirar(vizinho);
+        Lista* vizinhos = rede.getVizinhos(atual);
+        Celula* vizinhoAtual = vizinhos->getInicio();
+
+        while (vizinhoAtual != nullptr) {
+            int idVizinho = vizinhoAtual->valorInteiro;
+            if (!visitados[idVizinho]) {
+                visitados[idVizinho] = true;
+                predecessores[idVizinho] = atual;
+                fila.enfileirar(idVizinho);
+
+                if (idVizinho == destino) {
+                    destinoEncontrado = true;
+                    break;
+                }
             }
-            vizinhos = vizinhos->proximo;
+            vizinhoAtual = vizinhoAtual->proximo;
         }
     }
-    
-    // Reconstrói a rota
-    int* rota = nullptr;
-    tamanhoRota = 0;
-    
-    if (predecessores[destino] != -1) {
-        // Conta o tamanho da rota
-        int cont = 0;
-        int atual = destino;
-        while (atual != -1) {
-            cont++;
-            atual = predecessores[atual];
+
+    // Se o destino foi alcançado, reconstrói o caminho.
+    if (visitados[destino]) {
+        std::vector<int> caminhoInvertido;
+        int atualNaRota = destino;
+        while (atualNaRota != -1) {
+            caminhoInvertido.push_back(atualNaRota);
+            atualNaRota = predecessores[atualNaRota];
         }
+        // Inverte o vetor para ter a ordem correta (origem -> destino).
+        std::reverse(caminhoInvertido.begin(), caminhoInvertido.end());
         
-        tamanhoRota = cont;
-        rota = new int[tamanhoRota];
-        
-        // Preenche a rota na ordem correta
-        atual = destino;
-        for (int i = tamanhoRota - 1; i >= 0; i--) {
-            rota[i] = atual;
-            atual = predecessores[atual];
+        // Adiciona os nós à lista na ordem correta.
+        for(int no : caminhoInvertido) {
+            rota->adicionaInteiro(no);
         }
     }
-    
+
     delete[] visitados;
     delete[] predecessores;
-    
-    return rota;
+
+    return rota; // Retorna a rota (ou uma lista vazia se não houver caminho).
 }

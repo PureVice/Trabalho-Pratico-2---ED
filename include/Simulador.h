@@ -1,118 +1,53 @@
-#include "Pacote.h"
-#ifndef EVENTO_H
-#define EVENTO_H
-
-enum TipoEvento {
-    CHEGADA_PACOTE,
-    TRANSPORTE
-};
-
-class Evento {
-public:
-    Evento(double tempo, TipoEvento tipo) : tempo(tempo), tipo(tipo) {}
-    virtual ~Evento() {}
-    
-    double getTempo() const { return tempo; }
-    TipoEvento getTipo() const { return tipo; }
-    
-private:
-    double tempo; // Tempo em horas desde a referência
-    TipoEvento tipo;
-};
-
-class ChegadaPacoteEvento : public Evento {
-public:
-    ChegadaPacoteEvento(double tempo, Pacote* pacote, int armazem)
-        : Evento(tempo, CHEGADA_PACOTE), pacote(pacote), armazem(armazem) {}
-    
-    Pacote* getPacote() const { return pacote; }
-    int getArmazem() const { return armazem; }
-    
-private:
-    Pacote* pacote;
-    int armazem;
-};
-
-class TransporteEvento : public Evento {
-public:
-    TransporteEvento(double tempo, int origem, int destino, int capacidade)
-        : Evento(tempo, TRANSPORTE), origem(origem), destino(destino), capacidade(capacidade) {}
-    
-    int getOrigem() const { return origem; }
-    int getDestino() const { return destino; }
-    int getCapacidade() const { return capacidade; }
-    
-private:
-    int origem;
-    int destino;
-    int capacidade;
-};
-
-#endif // EVENTO_H
-
-
-#ifndef ESCALONADOR_H
-#define ESCALONADOR_H
-
-
-#include <cstdlib>
-
-// Estrutura para min-heap
-struct HeapEvento {
-    Evento* evento;
-    HeapEvento* esquerda;
-    HeapEvento* direita;
-    HeapEvento* pai;
-};
-
-class Escalonador {
-public:
-    Escalonador();
-    ~Escalonador();
-    
-    void insereEvento(Evento* evento);
-    Evento* retiraProximoEvento();
-    bool vazio() const;
-    
-private:
-    HeapEvento* raiz;
-    HeapEvento* ultimo;
-    int tamanho;
-    
-    void subir(HeapEvento* no);
-    void descer(HeapEvento* no);
-    HeapEvento* encontrarPaiInsercao();
-    HeapEvento* encontrarUltimo();
-};
-
-#endif 
-
 #ifndef SIMULADOR_H
 #define SIMULADOR_H
 
 #include "Rede.h"
 #include "Armazem.h"
+#include "Evento.h"
+#include "Escalonador.h"
+#include "Pacote.h"
+#include "Lista.h" // Para o log de saída.
+#include <string>
 
 class Simulador {
 public:
-    Simulador(Rede& rede, int numArmazens);
+    // O construtor recebe o caminho do arquivo de entrada.
+    Simulador(const char* arquivoEntrada);
     ~Simulador();
     
+    // Inicia e executa a simulação até que não haja mais eventos.
     void executar();
-    void carregarDados(const char* arquivo); // Para carregar pacotes de arquivo
-    
+
 private:
-    Rede& rede;
+    // --- Parâmetros da Simulação (lidos do arquivo) ---
+    int capacidadeTransporte;
+    double latenciaTransporte;
+    double intervaloTransportes;
+    double custoRemocao;
+
+    // --- Componentes do Sistema ---
+    Rede* rede;
     int numArmazens;
-    Armazem** armazens;
+    Armazem** armazens; // Usando array de ponteiros para controlar a criação.
     Escalonador escalonador;
-    double relogio; // Tempo atual da simulação em horas
     
+    // --- Controle da Simulação ---
+    double relogio;
+    int pacotesAtivos; // Contador de pacotes ainda não entregues.
+    Lista* logSaida; // Lista para armazenar as strings de log para a saída final.
+
+    // --- Métodos Privados Auxiliares ---
+    void carregarDados(const char* arquivoEntrada);
     void inicializarTransportes();
+    
+    // Métodos para processar os diferentes tipos de eventos.
     void processarChegadaPacote(ChegadaPacoteEvento* evento);
     void processarTransporte(TransporteEvento* evento);
-    void calcularERegistrarRota(Pacote* pacote);
+    
+    // Métodos de logging e formatação para a saída.
+    void registrarLog(double tempo, int idPacote, const std::string& mensagem);
+    void imprimirLogs();
+    std::string formatarId(int id, int largura);
 };
 
-#endif 
-
+#endif // SIMULADOR_H

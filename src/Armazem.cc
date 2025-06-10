@@ -1,81 +1,77 @@
 #include "../include/Armazem.h"
 #include <iostream>
 
-// -------------------- PilhaPacotes --------------------
+// --- Implementação da Classe Armazem ---
 
+Armazem::Armazem() : id(-1), numSecoes(0), secoes(nullptr) {}
 
-// -------------------- Armazem --------------------
-
-Armazem::Armazem(int id, int numDestnPossiveis) : id(id), numDestnPossiveis(numDestnPossiveis) {
-    secoes = new PilhaPacotes*[numDestnPossiveis];
-    for (int i = 0; i < numDestnPossiveis; ++i) {
-        secoes[i] = new PilhaPacotes();
+Armazem::Armazem(int id, int numTotalArmazens) : id(id), numSecoes(numTotalArmazens) {
+    // Aloca um array de Seções.
+    secoes = new Secao[numSecoes];
+    // Inicializa cada seção para um destino diferente.
+    for (int i = 0; i < numSecoes; ++i) {
+        secoes[i].setIdArmazemDestino(i);
     }
 }
 
 Armazem::~Armazem() {
-    for (int i = 0; i < numDestnPossiveis; ++i) {
-        delete secoes[i];
-    }
     delete[] secoes;
 }
 
-void Armazem::armazenarPacote(int destino, Pacote* pacote, double tempoAtual) {
-    if (pacote == nullptr) {
-        std::cerr << "Erro: Pacote nulo não pode ser armazenado." << std::endl;
+void Armazem::setId(int id) {
+    this->id = id;
+}
+
+int Armazem::getId() const {
+    return id;
+}
+
+// Encontra a seção correta com base no próximo destino do pacote e o armazena.
+void Armazem::armazenarPacote(Pacote* pacote) {
+    if (pacote == nullptr) return;
+
+    // O próximo destino do pacote determina em qual seção ele será armazenado.
+    int proximoDestino = pacote->getProximoSalto();
+
+    // Se não há próximo salto, o pacote já deveria ter sido marcado como "ENTREGUE".
+    if (proximoDestino == -1) {
+        // Este caso não deveria ocorrer se a lógica do simulador estiver correta.
+        // O pacote já está no seu destino final.
         return;
     }
-    if (pacote->getEstado() == Pacote::NAO_POSTADO) {
-        pacote->setEstado(Pacote::CHEGADA_ESCALONADA);
-        pacote->registrarTempoArmazenamento(tempoAtual);
-    } else if (pacote->getEstado() == Pacote::CHEGADA_ESCALONADA) {
+
+    Secao* secaoAlvo = getSecaoPorDestino(proximoDestino);
+    if (secaoAlvo != nullptr) {
+        secaoAlvo->addPacote(pacote);
         pacote->setEstado(Pacote::ARMAZENADO);
-    }
-    pacote->registrarTempoArmazenamento(tempoAtual);
-    if (destino >= 0 && destino < numDestnPossiveis) {
-        secoes[destino]->empilhar(pacote);
+    } else {
+        // Erro: não deveria acontecer se o armazém foi inicializado corretamente.
+        std::cerr << "ERRO: Armazem " << this->id 
+                  << " não possui seção para o destino " << proximoDestino << std::endl;
     }
 }
 
-Pacote* Armazem::recuperarPacote(int destino, double tempoAtual) {
-    if (destino < 0 || destino >= numDestnPossiveis) {
-        std::cerr << "Erro: Destino inválido." << std::endl;
-        return nullptr;
+// Retorna um ponteiro para a seção que corresponde a um ID de destino.
+Secao* Armazem::getSecaoPorDestino(int idDestino) {
+    if (idDestino < 0 || idDestino >= numSecoes) {
+        return nullptr; // ID de destino inválido.
     }
-    if (secoes[destino]->vazia()) {
-        std::cerr << "Erro: Não há pacotes para o destino " << destino << "." << std::endl;
-        return nullptr;
-    }
-    Pacote* pacote = secoes[destino]->topo();
-    if (pacote->getEstado() == Pacote::ARMAZENADO) {
-        pacote->setEstado(Pacote::ALOCADO_TRANSPORTE);
-        pacote->registrarTempoTransporte(tempoAtual);
-    }
-    pacote->avancarRota(); // Avança para o próximo armazém na rota
-    pacote->registrarTempoArmazenamento(tempoAtual);
-    // Desempilha o pacote após a recuperação
-    pacote = secoes[destino]->topo();
-    if (pacote == nullptr) {
-        std::cerr << "Erro: Pacote não encontrado após desempilhamento." << std::endl;
-        return nullptr;
-    }
-    pacote->setEstado(Pacote::CHEGOU_NAO_ARMAZENADO);
-    pacote->registrarTempoArmazenamento(tempoAtual);
-    // Desempilha o pacote da seção
-    pacote = secoes[destino]->desempilhar();
-    if (pacote == nullptr) {
-        std::cerr << "Erro: Pacote não encontrado após desempilhamento." << std::endl;
-        return nullptr;
-    }
-    if (destino >= 0 && destino < numDestnPossiveis) {
-        return secoes[destino]->desempilhar();
-    }
-    return nullptr;
+    // Como inicializamos as seções com IDs de 0 a N-1, podemos acessar diretamente.
+    return &secoes[idDestino];
 }
 
-bool Armazem::temPacoteParaDestino(int destino) const {
-    if (destino >= 0 && destino < numDestnPossiveis) {
-        return !secoes[destino]->vazia();
+// Imprime o conteúdo de todas as seções não vazias (para depuração).
+void Armazem::imprimePacotesArmazenados() const {
+    std::cout << "--- Status do Armazem " << id << " ---" << std::endl;
+    bool algumPacote = false;
+    for (int i = 0; i < numSecoes; ++i) {
+        if (!secoes[i].estaVazia()) {
+            secoes[i].imprimeSecao();
+            algumPacote = true;
+        }
     }
-    return false;
+    if (!algumPacote) {
+        std::cout << "  Nenhum pacote armazenado." << std::endl;
+    }
+    std::cout << "-------------------------" << std::endl;
 }

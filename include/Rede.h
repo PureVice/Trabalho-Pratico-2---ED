@@ -1,55 +1,36 @@
 #ifndef REDE_H
 #define REDE_H
 
-#include <cstdlib>
+#include "Lista.h"
+#include "Armazem.h"
 
-// Enumeração para tipos de variáveis
-typedef enum {
-  TIPO_INTEIRO,
-  TIPO_LISTA
-} TipoVariavel;
-
-// Estrutura de lista encadeada
-typedef struct s_lista {
-  TipoVariavel tipo;
-  int valorInteiro;
-  struct s_lista* valorLista;
-  struct s_lista* proximo;
-} Lista;
-
-class Rede {
-private:
-    Lista* nos;
-
-    // Funções auxiliares para manipulação de listas
-    Lista* criaLista(TipoVariavel tipo, Lista* valorLista, int valorInteiro);
-    void adicionaItem(Lista* inicio, Lista* valorLista, int valorInteiro) ;
-    void imprimeLista(Lista* inicio) ;
-    void deletaLista(Lista* inicio);
-
+// A classe Rede modela o grafo de conexões entre os armazéns.
+class Rede
+{
 public:
-    // Construtor e destrutor
-    Rede();
+    // Construtor que recebe o número total de armazéns para inicializar o grafo.
+    Rede(int numArmazens);
     ~Rede();
 
-    // Métodos de análise da rede
-    int QuantidadeArmazens(Rede* rede) ;
-    int QuantidadeArestas(Rede* rede) ;
-    int GrauMinimo(Rede* rede) ;
-    int GrauMaximo(Rede* rede) ;
-
-    // Métodos de modificação da rede
-    void InsereArmazem(Rede* rede);
+    // Insere uma aresta (conexão) entre dois armazéns 'v' e 'w'.
     void InsereAresta(int v, int w);
-    
-    // Método de visualização
-    void ImprimeVizinhos(int v) ;
-    
-    // Método de acesso
-    Lista* getNos()  { return nos; }
-    
-    // Método para cálculo de rotas
-    int* calculaRota(Rede& rede, int origem, int destino, int numArmazens, int& tamanhoRota);
+
+    // Retorna a lista de vizinhos (adjacências) de um dado armazém.
+    Lista* getVizinhos(int v) const;
+
+    // --- Getters para propriedades do grafo ---
+    int getNumArmazens() const;
+    void Imprime() const; // Para depuração.
+
+private:
+    int numArmazens;     // Número de vértices (armazéns) no grafo.
+    Lista** adjacencias; // Array de listas de adjacência.
 };
+
+// --- Funções Auxiliares ---
+
+// Função que calcula a rota mais curta (em número de saltos) entre uma origem e um destino.
+// Usa o algoritmo de Busca em Largura (BFS).
+Lista* calculaRota(const Rede& rede, int origem, int destino);
 
 #endif // REDE_H
