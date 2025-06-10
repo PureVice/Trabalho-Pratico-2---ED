@@ -25,7 +25,9 @@ private:
     long long prioridade;
 
 protected:
+    // Changed to include packetId for tie-breaking
     void calcularPrioridadeChegada(Pacote* pacote);
+    // Changed to include origin/destination for tie-breaking
     void calcularPrioridadeTransporte(int origem, int destino);
 };
 

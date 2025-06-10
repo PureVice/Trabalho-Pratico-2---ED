@@ -156,7 +156,11 @@ void Simulador::processarChegadaPacote(ChegadaPacoteEvento* evento) {
 }
 
 bool compararPacotes(Pacote* a, Pacote* b) {
-    return a->getTempoPostagem() < b->getTempoPostagem();
+    if (a->getTempoPostagem() != b->getTempoPostagem()) {
+        return a->getTempoPostagem() < b->getTempoPostagem();
+    }
+    // Critério de desempate: ordena por ID do pacote se os tempos de postagem forem iguais.
+    return a->getId() < b->getId();
 }
 
 void Simulador::processarTransporte(TransporteEvento* evento) {
@@ -207,20 +211,18 @@ void Simulador::processarTransporte(TransporteEvento* evento) {
 
     // === INÍCIO DA LÓGICA CORRIGIDA ===
 
-    // Armazenamento temporário para pacotes que serão de fato transportados
-    Pacote** pacotesParaTransportar = new Pacote*[pacotesATransportarCount];
-    int transportadosCount = 0;
-
+    
     double tempoDaOperacao = relogio + 1.0; 
-    PilhaPacotes pilhaTemporaria;
+    PilhaPacotes pilhaTemporaria; // Para pacotes que serão re-empilhados
     
     char msgBuffer[100];
     char idOrigemBuffer[4], idDestinoBuffer[4];
     formatarId(origemId, 3, idOrigemBuffer);
     formatarId(destinoId, 3, idDestinoBuffer);
 
-    // --- FASE 1: Remoção e Identificação ---
-    // Desempilha todos, registra a remoção e identifica quais serão transportados.
+    // --- FASE 1: Remoção e Particionamento ---
+    // Esvazia a pilha da seção, registrando a remoção de cada pacote.
+    // Pacotes não selecionados para transporte são guardados em uma pilha temporária.
     while(!pilha->vazia()) {
         Pacote* pacoteDoTopo = pilha->desempilhar();
         tempoDaOperacao += custoRemocao;
@@ -236,23 +238,16 @@ void Simulador::processarTransporte(TransporteEvento* evento) {
             }
         }
 
-        if(transportarEste) {
-            // --- DEBUG ---
-            std::cerr << "[DEBUG]     - Pacote " << pacoteDoTopo->getId() << " sera transportado." << std::endl;
-            // --- FIM DEBUG ---
-            pacotesParaTransportar[transportadosCount++] = pacoteDoTopo;
-        } else {
-            // --- DEBUG ---
-            std::cerr << "[DEBUG]     - Pacote " << pacoteDoTopo->getId() << " sera re-empilhado." << std::endl;
-            // --- FIM DEBUG ---
+        if(!transportarEste) {
+            // Se não for transportado, vai para a pilha temporária para ser re-empilhado.
             pilhaTemporaria.empilhar(pacoteDoTopo);
         }
     }
     
-    // --- FASE 2: Log de Transporte e Escalonamento ---
-    // Agora que o tempo final da operação foi calculado, registra o trânsito de todos os pacotes selecionados.
-    for (int i = 0; i < transportadosCount; ++i) {
-        Pacote* pacote = pacotesParaTransportar[i];
+    // --- FASE 2: Log de Transporte e Escalonamento (A CORREÇÃO PRINCIPAL ESTÁ AQUI) ---
+    // Itera sobre o array `pacotesSelecionados`, que está na ordem correta (por tempo de postagem).
+    for (int i = 0; i < pacotesATransportarCount; ++i) {
+        Pacote* pacote = pacotesSelecionados[i]; // Usa o array ordenado
         pacote->avancarRota();
         pacote->setEstado(Pacote::EM_TRANSITO);
 
@@ -264,12 +259,11 @@ void Simulador::processarTransporte(TransporteEvento* evento) {
     }
 
     // --- FASE 3: Rearmazenamento ---
-    // Reempilha os pacotes que não foram transportados.
+    // Reempilha os pacotes que não foram transportados de volta para a seção.
     while(!pilhaTemporaria.vazia()) {
         Pacote* pacoteParaRearmazenar = pilhaTemporaria.desempilhar();
         pilha->empilhar(pacoteParaRearmazenar);
         sprintf(msgBuffer, "rearmazenado em %s na secao %s", idOrigemBuffer, idDestinoBuffer);
-        // Usa o tempo final da operação também para o log de rearmazenamento
         registrarLog(tempoDaOperacao, pacoteParaRearmazenar->getId(), msgBuffer);
     }
 
@@ -280,7 +274,7 @@ void Simulador::processarTransporte(TransporteEvento* evento) {
     
     delete[] pacotesNaSecao;
     delete[] pacotesSelecionados;
-    delete[] pacotesParaTransportar; // Limpa a memória do array temporário
+     // Limpa a memória do array temporário
 }
 
 void Simulador::registrarLog(double tempo, int idPacote, const char* mensagem) {

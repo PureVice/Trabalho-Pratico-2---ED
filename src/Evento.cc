@@ -12,16 +12,22 @@ long long Evento::getPrioridade() const { return prioridade; }
 
 void Evento::calcularPrioridadeChegada(Pacote* pacote) {
     long long tempoInt = static_cast<long long>(this->getTempo());
-    long long dadosEvento = pacote->getId();
-    long long tipoEvento = 1;
-    this->prioridade = tempoInt * 10000000LL + dadosEvento * 10LL + tipoEvento;
+    // Use the packet ID directly for tie-breaking
+    long long dadosEvento = pacote->getId(); 
+    long long tipoEvento = 1; // Prioridade menor para ChegadaPacoteEvento para ser processado antes de TransporteEvento com o mesmo tempo
+    // The packet ID should be a component of the priority to ensure deterministic ordering
+    // Shift tempoInt by a large factor, then add packet ID, then type. This ensures
+    // that tempo is the primary sort key, then packet ID, then event type.
+    this->prioridade = tempoInt * 1000000000LL + dadosEvento * 10LL + tipoEvento; // Increased factor for tempoInt
 }
 
 void Evento::calcularPrioridadeTransporte(int origem, int destino) {
     long long tempoInt = static_cast<long long>(this->getTempo());
-    long long dadosEvento = origem * 1000 + destino; 
-    long long tipoEvento = 2; 
-    this->prioridade = tempoInt * 10000000LL + dadosEvento * 10LL + tipoEvento;
+    // Combine origin and destination for unique tie-breaking
+    long long dadosEvento = origem * 10000 + destino; // Larger factor for origin to distinguish from other events
+    long long tipoEvento = 2; // Prioridade maior para TransporteEvento
+    // Shift tempoInt by a large factor, then add combined origin/destination, then type.
+    this->prioridade = tempoInt * 1000000000LL + dadosEvento * 10LL + tipoEvento; // Increased factor for tempoInt
 }
 
 // --- Implementação de ChegadaPacoteEvento ---
