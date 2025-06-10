@@ -22,9 +22,6 @@ void Escalonador::Inserir(Evento* ev) {
     if (tamanho == capacidade) {
         redimensionar();
     }
-    // --- DEBUG ---
-    std::cerr << "[DEBUG] Escalonador::Inserir Evento: Tipo=" << ev->getTipo() << ", Tempo=" << ev->getTempo() << ", Prioridade=" << ev->getPrioridade() << std::endl;
-    // --- FIM DEBUG ---
     data[tamanho] = ev;
     HeapifyPorCima(tamanho);
     tamanho++;
@@ -37,10 +34,7 @@ Evento* Escalonador::Remover() {
     }
 
     Evento* raiz = data[0];
-    // --- DEBUG ---
-    std::cerr << "[DEBUG] Escalonador::Remover Evento: Tipo=" << raiz->getTipo() << ", Tempo=" << raiz->getTempo() << ", Prioridade=" << raiz->getPrioridade() << std::endl;
-    // --- FIM DEBUG ---
-
+    
     data[0] = data[tamanho - 1];
     tamanho--;
     if (!Vazio()) {

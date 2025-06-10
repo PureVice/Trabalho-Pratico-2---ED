@@ -111,20 +111,6 @@ Lista* calculaRota(const Rede& rede, int origem, int destino) {
         delete[] caminhoCorreto;
     }
 
-    // --- DEBUG ---
-    if (!rota->vazia()){
-        std::cerr << "[DEBUG] Rota Calculada para " << origem << "->" << destino << ": ";
-        Celula* r = rota->getInicio();
-        while(r) {
-            std::cerr << r->valorInteiro << (r->proximo ? " -> " : "");
-            r = r->proximo;
-        }
-        std::cerr << std::endl;
-    } else {
-        std::cerr << "[DEBUG] Rota nao encontrada para " << origem << " -> " << destino << std::endl;
-    }
-    // --- FIM DEBUG ---
-
     delete[] visitados;
     delete[] predecessores;
 

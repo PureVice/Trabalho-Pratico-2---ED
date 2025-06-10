@@ -40,12 +40,6 @@ void Simulador::carregarDados(const char* arquivoEntrada) {
     arquivo >> intervaloTransportes;
     arquivo >> custoRemocao;
 
-    // --- DEBUG ---
-    std::cerr << "[DEBUG] Parametros Carregados: capacidadeTransporte=" << capacidadeTransporte 
-              << ", latencia=" << latenciaTransporte << ", intervalo=" << intervaloTransportes 
-              << ", custoRemocao=" << custoRemocao << std::endl;
-    // --- FIM DEBUG ---
-
     arquivo >> numArmazens;
     this->rede = new Rede(numArmazens);
     this->armazens = new Armazem*[numArmazens];
@@ -69,11 +63,6 @@ void Simulador::carregarDados(const char* arquivoEntrada) {
         char buffer[10];
         arquivo >> tempoPostagem >> buffer >> idPacote >> buffer >> idOrigem >> buffer >> idDestino;
         
-        // --- DEBUG ---
-        std::cerr << "[DEBUG] Pacote Lido do Arquivo: ID=" << idPacote << ", Origem=" << idOrigem 
-                  << ", Destino=" << idDestino << ", Tempo=" << tempoPostagem << std::endl;
-        // --- FIM DEBUG ---
-
         Pacote* p = new Pacote(idPacote, idOrigem, idDestino, tempoPostagem);
         p->setRota(calculaRota(*rede, idOrigem, idDestino));
         p->setEstado(Pacote::CHEGADA_AGENDADA);
@@ -92,17 +81,6 @@ void Simulador::executar() {
             relogio = proximoEvento->getTempo();
         }
 
-        // --- DEBUG ---
-        std::cerr << "\n[DEBUG] === Processando Evento === Relogio: " << relogio << " === Pacotes Ativos: " << pacotesAtivos << " ===" << std::endl;
-        if (proximoEvento->getTipo() == CHEGADA_PACOTE) {
-            ChegadaPacoteEvento* cpe = static_cast<ChegadaPacoteEvento*>(proximoEvento);
-            std::cerr << "[DEBUG]   - Evento de CHEGADA_PACOTE ID=" << cpe->getPacote()->getId() << " no Armazem=" << cpe->getArmazemChegada() << " em T=" << cpe->getTempo() << std::endl;
-        } else if (proximoEvento->getTipo() == TRANSPORTE) {
-            TransporteEvento* te = static_cast<TransporteEvento*>(proximoEvento);
-            std::cerr << "[DEBUG]   - Evento de TRANSPORTE de " << te->getOrigem() << " para " << te->getDestino() << " em T=" << te->getTempo() << std::endl;
-        }
-        // --- FIM DEBUG ---
-
         if (proximoEvento->getTipo() == CHEGADA_PACOTE) {
             processarChegadaPacote(static_cast<ChegadaPacoteEvento*>(proximoEvento));
         } else if (proximoEvento->getTipo() == TRANSPORTE) {
@@ -110,7 +88,6 @@ void Simulador::executar() {
         }
         delete proximoEvento;
     }
-    std::cerr << "\n[DEBUG] === Fim da Simulacao === Nao ha mais eventos ou pacotes." << std::endl;
     imprimirLogs();
 }
 
@@ -174,12 +151,6 @@ void Simulador::processarTransporte(TransporteEvento* evento) {
         return;
     }
 
-    // --- DEBUG ---
-    std::cerr << "[DEBUG]   - Status da Secao " << origemId << "->" << destinoId << " antes do transporte:";
-    secao->getPilha()->imprimePilha(std::cerr);
-    std::cerr << " [BASE]" << std::endl;
-    // --- FIM DEBUG ---
-
     PilhaPacotes* pilha = secao->getPilha();
     int numPacotesNaSecao = pilha->getTamanho();
     Pacote** pacotesNaSecao = pilha->getPacotes();
@@ -200,17 +171,6 @@ void Simulador::processarTransporte(TransporteEvento* evento) {
     for(int i = 0; i < pacotesATransportarCount; ++i) {
         pacotesSelecionados[i] = pacotesNaSecao[i];
     }
-    
-    // --- DEBUG ---
-    std::cerr << "[DEBUG]   - Pacotes selecionados para transporte (" << pacotesATransportarCount << "):";
-    for(int i = 0; i < pacotesATransportarCount; ++i) {
-        std::cerr << " " << pacotesSelecionados[i]->getId();
-    }
-    std::cerr << std::endl;
-    // --- FIM DEBUG ---
-
-    // === INÍCIO DA LÓGICA CORRIGIDA ===
-
     
     double tempoDaOperacao = relogio + 1.0; 
     PilhaPacotes pilhaTemporaria; // Para pacotes que serão re-empilhados
@@ -267,8 +227,6 @@ void Simulador::processarTransporte(TransporteEvento* evento) {
         registrarLog(tempoDaOperacao, pacoteParaRearmazenar->getId(), msgBuffer);
     }
 
-    // === FIM DA LÓGICA CORRIGIDA ===
-
     Evento* proximoTransporte = new TransporteEvento(relogio + intervaloTransportes, origemId, destinoId);
     escalonador.Inserir(proximoTransporte);
     
@@ -284,11 +242,6 @@ void Simulador::registrarLog(double tempo, int idPacote, const char* mensagem) {
     
     sprintf(logBuffer, "%07d pacote %s %s", static_cast<int>(round(tempo)), idPacoteBuffer, mensagem);
     
-    // --- DEBUG ---
-    // Imprime o log no stderr no momento da sua criação para vermos a ordem real.
-    std::cerr << "[LOG] " << logBuffer << std::endl;
-    // --- FIM DEBUG ---
-
     logSaida->adicionaString(logBuffer);
 }
 

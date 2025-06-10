@@ -35,9 +35,6 @@ void Armazem::armazenarPacote(Pacote* pacote) {
 
     Secao* secaoAlvo = getSecaoPorDestino(proximoDestino);
     if (secaoAlvo != nullptr) {
-        // --- DEBUG ---
-        std::cerr << "[DEBUG] Armazem " << this->id << "::armazenarPacote ID=" << pacote->getId() << " na secao para " << proximoDestino << std::endl;
-        // --- FIM DEBUG ---
         secaoAlvo->addPacote(pacote);
         pacote->setEstado(Pacote::ARMAZENADO);
     } else {
