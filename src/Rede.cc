@@ -91,32 +91,42 @@ Lista* calculaRota(const Rede& rede, int origem, int destino) {
     if (visitados[destino]) {
         int contadorPassos = 0;
         int atualNaRota = destino;
-        // Primeiro, conta quantos passos a rota possui
         while (atualNaRota != -1) {
             contadorPassos++;
             atualNaRota = predecessores[atualNaRota];
         }
 
-        // Aloca um array temporário para armazenar a rota na ordem correta
         int* caminhoCorreto = new int[contadorPassos];
         
         atualNaRota = destino;
-        // Preenche o array da última posição para a primeira (invertendo a ordem)
         for (int i = contadorPassos - 1; i >= 0; i--) {
             caminhoCorreto[i] = atualNaRota;
             atualNaRota = predecessores[atualNaRota];
         }
         
-        // Adiciona os nós do array para a lista na ordem correta.
         for(int i = 0; i < contadorPassos; i++) {
             rota->adicionaInteiro(caminhoCorreto[i]);
         }
         
-        delete[] caminhoCorreto; // Libera memória do array temporário
+        delete[] caminhoCorreto;
     }
+
+    // --- DEBUG ---
+    if (!rota->vazia()){
+        std::cerr << "[DEBUG] Rota Calculada para " << origem << "->" << destino << ": ";
+        Celula* r = rota->getInicio();
+        while(r) {
+            std::cerr << r->valorInteiro << (r->proximo ? " -> " : "");
+            r = r->proximo;
+        }
+        std::cerr << std::endl;
+    } else {
+        std::cerr << "[DEBUG] Rota nao encontrada para " << origem << " -> " << destino << std::endl;
+    }
+    // --- FIM DEBUG ---
 
     delete[] visitados;
     delete[] predecessores;
 
-    return rota; // Retorna a rota (ou uma lista vazia se não houver caminho).
+    return rota;
 }

@@ -2,6 +2,7 @@
 #define SECAO_H
 
 #include "Pacote.h"
+#include <iostream> // Adicionado para std::ostream
 
 // --- Estrutura do Nó da Pilha ---
 // Um nó simples para a lista encadeada que forma a pilha.
@@ -21,7 +22,7 @@ public:
     Pacote* desempilhar();         // Remove e retorna o pacote do topo.
     Pacote* topo() const;          // Apenas retorna o pacote do topo, sem remover.
     bool vazia() const;
-    void imprimePilha() const;     // Para depuração.
+    void imprimePilha(std::ostream& out = std::cout) const; // Assinatura alterada para debug
     int getTamanho() const;        // Retorna o número de pacotes na pilha.
     
     // Retorna uma cópia dos pacotes como um array para análise.
@@ -47,7 +48,7 @@ public:
     bool estaVazia() const;
     int getIdArmazemDestino() const;
     void setIdArmazemDestino(int id);
-    void imprimeSecao() const;
+    void imprimeSecao(std::ostream& out = std::cout) const; // Assinatura alterada para debug
 
 private:
     int idArmazemDestino; // Para qual armazém esta seção envia pacotes.

@@ -22,6 +22,9 @@ void Escalonador::Inserir(Evento* ev) {
     if (tamanho == capacidade) {
         redimensionar();
     }
+    // --- DEBUG ---
+    std::cerr << "[DEBUG] Escalonador::Inserir Evento: Tipo=" << ev->getTipo() << ", Tempo=" << ev->getTempo() << ", Prioridade=" << ev->getPrioridade() << std::endl;
+    // --- FIM DEBUG ---
     data[tamanho] = ev;
     HeapifyPorCima(tamanho);
     tamanho++;
@@ -34,6 +37,10 @@ Evento* Escalonador::Remover() {
     }
 
     Evento* raiz = data[0];
+    // --- DEBUG ---
+    std::cerr << "[DEBUG] Escalonador::Remover Evento: Tipo=" << raiz->getTipo() << ", Tempo=" << raiz->getTempo() << ", Prioridade=" << raiz->getPrioridade() << std::endl;
+    // --- FIM DEBUG ---
+
     data[0] = data[tamanho - 1];
     tamanho--;
     if (!Vazio()) {
@@ -70,19 +77,16 @@ void Escalonador::HeapifyPorBaixo(int posicao) {
 
     int menor = esq;
 
-    // *** ALTERAÇÃO PRINCIPAL: Compara usando a chave de prioridade. ***
     if (dir < tamanho && data[dir]->getPrioridade() < data[esq]->getPrioridade()) {
         menor = dir;
     }
 
-    // *** ALTERAÇÃO PRINCIPAL: Compara usando a chave de prioridade. ***
     if (data[menor]->getPrioridade() < data[posicao]->getPrioridade()) {
-        // Troca os ponteiros de evento.
         Evento* temp = data[posicao];
         data[posicao] = data[menor];
         data[menor] = temp;
 
-        HeapifyPorBaixo(menor); // Continua recursivamente.
+        HeapifyPorBaixo(menor);
     }
 }
 
@@ -92,14 +96,12 @@ void Escalonador::HeapifyPorCima(int posicao) {
 
     int ancestral = GetAncestral(posicao);
 
-    // *** ALTERAÇÃO PRINCIPAL: Compara usando a chave de prioridade. ***
     if (data[posicao]->getPrioridade() < data[ancestral]->getPrioridade()) {
-        // Troca os ponteiros de evento.
         Evento* temp = data[posicao];
         data[posicao] = data[ancestral];
         data[ancestral] = temp;
 
-        HeapifyPorCima(ancestral); // Continua recursivamente.
+        HeapifyPorCima(ancestral);
     }
 }
 

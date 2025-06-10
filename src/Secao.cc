@@ -1,5 +1,6 @@
 #include "../include/Secao.h"
 #include <iostream>
+#include <ostream> // Adicionado para std::ostream
 
 // --- Implementação da Classe PilhaPacotes ---
 
@@ -59,13 +60,13 @@ Pacote** PilhaPacotes::getPacotes() const {
 }
 
 
-void PilhaPacotes::imprimePilha() const {
+void PilhaPacotes::imprimePilha(std::ostream& out) const {
     if (vazia()) {
         return;
     }
     NoPilha* atual = topoPilha;
     while (atual != nullptr) {       
-        std::cout << " " << atual->pacote->getId();
+        out << " " << atual->pacote->getId();
         atual = atual->proximo;
     }
 }
@@ -104,8 +105,8 @@ void Secao::setIdArmazemDestino(int id) {
     idArmazemDestino = id;
 }
 
-void Secao::imprimeSecao() const {
-    std::cout << "  Secao para Destino (" << idArmazemDestino << "): [TOPO]";
-    pilhaPacotes->imprimePilha();
-    std::cout << " [BASE]" << std::endl;
+void Secao::imprimeSecao(std::ostream& out) const {
+    out << "  Secao para Destino (" << idArmazemDestino << "): [TOPO]";
+    pilhaPacotes->imprimePilha(out);
+    out << " [BASE]" << std::endl;
 }
