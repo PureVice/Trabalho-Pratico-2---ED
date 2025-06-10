@@ -10,11 +10,8 @@
 
 using namespace std;
 
-Simulador::Simulador(const char *arquivotxt) : relogio(0.0) // Initialize relogio to 0.0
+Simulador::Simulador(const char *arquivotxt) : relogio(0.0), pacotesAtivos(0) // Initialize relogio and pacotesAtivos
 {
-    // The Escalonador is a member object, so its default constructor is called.
-    // If it requires parameters, you'd pass them in the initializer list.
-    
     std::ifstream arquivo(arquivotxt);
     if (!arquivo.is_open())
     {
@@ -34,7 +31,7 @@ Simulador::Simulador(const char *arquivotxt) : relogio(0.0) // Initialize relogi
         if (!(arquivo >> qtdArestas))
         {
             cerr << "Erro ao ler quantidade de arestas para armazém " << i << endl;
-            exit(EXIT_FAILURE); // Exit on error
+            exit(EXIT_FAILURE);
         }
         this->armazens[i].setId(i);
         this->armazens[i].setNumDestnPossiveis(numArmazens); // Set total possible destinations
@@ -47,12 +44,12 @@ Simulador::Simulador(const char *arquivotxt) : relogio(0.0) // Initialize relogi
             if (!(arquivo >> w))
             {
                 cerr << "Erro ao ler conexão " << j << " do armazém " << i << endl;
-                exit(EXIT_FAILURE); // Exit on error
+                exit(EXIT_FAILURE);
             }
             if (w < 0 || w >= numArmazens)
             {
                 cerr << "Conexão inválida: " << w << " para armazém " << i << endl;
-                exit(EXIT_FAILURE); // Exit on error
+                exit(EXIT_FAILURE);
             }
             cout << "  Conexão com armazém " << w << endl;
             this->rede->InsereAresta(i, w);
@@ -80,6 +77,7 @@ Simulador::Simulador(const char *arquivotxt) : relogio(0.0) // Initialize relogi
     // Read and schedule initial packages
     int qtdPacotes;
     arquivo >> qtdPacotes;
+    pacotesAtivos = qtdPacotes; // Initialize with total packages to be processed
 
     for (int i = 0; i < qtdPacotes; i++)
     {
@@ -111,7 +109,7 @@ Simulador::Simulador(const char *arquivotxt) : relogio(0.0) // Initialize relogi
     }
     arquivo.close();
 
-    // Schedule initial transport events for all connections
+    // Schedule initial transport events for all connections based on the "once a day" rule.
     inicializarTransportes();
 }
 
@@ -125,9 +123,12 @@ Simulador::~Simulador()
 void Simulador::executar()
 {
     // Main simulation loop
-    while (!escalonador.Vazio())
+    // Loop continues as long as there are events AND active packages remain.
+    // If there are no more active packages, but transport events are still scheduled,
+    // they might still run, but won't process packages. This condition helps terminate faster.
+    while (!escalonador.Vazio() && pacotesAtivos > 0) 
     {
-        Evento* proximoEvento = escalonador.Remover(); // Get the next event
+        Evento* proximoEvento = escalonador.Remover();
         relogio = proximoEvento->getTempo(); // Advance simulation clock
 
         cout << "\n--- Processando evento em T=" << fixed << setprecision(2) << relogio << " ---" << endl;
@@ -147,44 +148,28 @@ void Simulador::executar()
         delete proximoEvento; 
     }
     cout << "\nSimulação concluída em T=" << fixed << setprecision(2) << relogio << endl;
-
-    // TODO: Generate final statistics here
+    cout << "Total de pacotes ativos restantes: " << pacotesAtivos << endl; // Should be 0
 }
 
 void Simulador::inicializarTransportes() {
-    // For each connection between warehouses, schedule a recurring transport event.
-    // The problem states "Uma vez por dia pacotes são transportados de um armazém para o outro".
-    // Assuming "dia" means 24 hours for simplicity if no other frequency is given.
-    // And "capacidade" is also not explicitly given per connection, assuming a default.
-    // For now, let's just schedule a transport event from each warehouse to its direct neighbors.
-    // The frequency will be TEMPO_TRANSPORTE_ARMAZENS.
-
-    cout << "\n--- Inicializando eventos de transporte ---" << endl;
+    cout << "\n--- Inicializando eventos de transporte periódicos ---" << endl;
+    // Schedule initial transport events for all connected pairs of warehouses.
+    // These transports will then reschedule themselves.
+    // We iterate through all warehouses and their neighbors to schedule these.
+    
+    // To avoid duplicate events for undirected edges (A->B and B->A),
+    // we can enforce an order (e.g., only schedule if i < destino_id).
     for (int i = 0; i < numArmazens; ++i) {
         Lista* vizinhos = rede->getVizinhos(i);
         Lista* currentVizinho = vizinhos;
         while (currentVizinho != nullptr) {
             int destino_id = currentVizinho->valorInteiro;
-            // Schedule the first transport event at TEMPO_TRANSPORTE_ARMAZENS from now
-            // Or perhaps at a predefined interval, depending on interpretation.
-            // Let's assume daily transports from the beginning of the simulation (relogio = 0)
-            // and subsequent transports every TEMPO_TRANSPORTE_ARMAZENS hours.
-            
-            // For simplicity in this initial setup, we will schedule a transport event from
-            // origin 'i' to 'destino_id' at an arbitrary future time, e.g., 24 hours.
-            // A more robust simulation would need to manage recurring events properly.
-            // For the scope of the problem, a single transport event can trigger the next one.
-            
-            // This needs to be handled carefully: A transport event will process packages
-            // from one origin to one destination.
-            // We need to ensure that a transport event is scheduled for each *pair* of connected warehouses.
-            
-            // To avoid duplicate transport events (A->B and B->A scheduled separately but representing the same trip),
-            // we could enforce an order (e.g., i < destino_id).
-            if (i < destino_id) { // Only schedule for one direction of the undirected edge
-                Evento* transport_ev = new TransporteEvento(TEMPO_TRANSPORTE_ARMAZENS, i, destino_id, 5); // Assuming capacity 5 for now
+            if (i < destino_id) { // Ensure each connection (edge) schedules transport only once
+                // Schedule the first transport event at a fixed interval from time 0, e.g., TEMPO_TRANSPORTE_ARMAZENS
+                // Assuming capacity of 5 packages per transport as a default
+                Evento* transport_ev = new TransporteEvento(TEMPO_TRANSPORTE_ARMAZENS, i, destino_id, 5); 
                 escalonador.Inserir(transport_ev);
-                cout << "  Agendado transporte de " << i << " para " << destino_id << " em T=" << TEMPO_TRANSPORTE_ARMAZENS << endl;
+                cout << "  Agendado transporte periódico inicial de " << i << " para " << destino_id << " em T=" << TEMPO_TRANSPORTE_ARMAZENS << endl;
             }
             currentVizinho = currentVizinho->proximo;
         }
@@ -195,38 +180,31 @@ void Simulador::processarChegadaPacote(ChegadaPacoteEvento* evento) {
     Pacote* pacote = evento->getPacote();
     int armazem_atual_id = evento->getArmazem();
 
+    pacote->setEstadoAtual(Pacote::CHEGOU_ARMAZEM); // Update state to arrived
     cout << "  Chegada do pacote " << pacote->getId() << " ao armazém " << armazem_atual_id << endl;
 
-    // A package arriving at an warehouse should be stored
-    armazens[armazem_atual_id].armazenarPacote(pacote);
-
-    // After storing, the package might be ready for the next transport.
-    // The next transport event will pick it up.
-    // No new event is scheduled immediately after storing, as transports happen "once a day".
+    // If it's the final destination, register delivery.
+    if (pacote->getDestino() == armazem_atual_id) { 
+        registrarEntregaPacote(pacote);
+    } else {
+        // If it's an intermediate warehouse, store the package.
+        // It will wait in the warehouse for the next scheduled transport.
+        armazens[armazem_atual_id].armazenarPacote(pacote);
+        pacote->setEstadoAtual(Pacote::ARMAZENADO); // Update state to stored
+        cout << "    Pacote " << pacote->getId() << " armazenado no armazém " << armazem_atual_id << " aguardando transporte." << endl;
+    }
 }
 
 void Simulador::processarTransporte(TransporteEvento* evento) {
     int origem_id = evento->getOrigem();
-    int destino_id = evento->getDestino();
+    int destino_id = evento->getDestino(); // This is the next hop
     int capacidade_transporte = evento->getCapacidade();
 
-    cout << "  Processando transporte de " << origem_id << " para " << destino_id << " com capacidade " << capacidade_transporte << endl;
+    cout << "  Processando oportunidade de transporte de " << origem_id << " para " << destino_id << " com capacidade " << capacidade_transporte << endl;
 
-    // Check if there are packages to transport from origin to destination
-    // For each possible next destination from 'origem_id', check if there are packages.
-    // The problem states: "Uma vez por dia pacotes são transportados de um armazém para o outro, de acordo com a sua rota, com prioridade para os pacotes que estão em trânsito há mais tempo."
-    // And "Há um limite do número de pacotes que podem ser transportados por dia entre dois armazéns."
-
-    int pacotes_transportados_count = 0;
-    // Iterate through sections of the origin warehouse to find packages destined for 'destino_id'
-    // or any other next hop on their route from 'origem_id'.
-    
-    // The problem statement implies packages are stored in sections based on their *next* destination.
-    // So, we need to check the section corresponding to 'destino_id' in 'origem_id' warehouse.
-
-    // Find the section in 'origem_id' warehouse that corresponds to 'destino_id'
     Secao* secao_origem_para_destino = nullptr;
-    for (int i = 0; i < numArmazens; ++i) { // Iterate through possible sections in the origin warehouse
+    // Find the section in the origin warehouse that holds packages for 'destino_id' (the next hop)
+    for (int i = 0; i < armazens[origem_id].getNumDestnPossiveis(); ++i) { 
         if (armazens[origem_id].getSecao(i)->getIdArmazem() == destino_id) {
             secao_origem_para_destino = armazens[origem_id].getSecao(i);
             break;
@@ -234,50 +212,60 @@ void Simulador::processarTransporte(TransporteEvento* evento) {
     }
 
     if (secao_origem_para_destino != nullptr) {
+        int pacotes_transportados_count = 0;
+        // Keep transporting until section is empty or capacity is reached
         while (!secao_origem_para_destino->vazia() && pacotes_transportados_count < capacidade_transporte) {
             Pacote* pacote_a_transportar = secao_origem_para_destino->desempilhar(); // LIFO
             if (pacote_a_transportar != nullptr) {
+                cout << "    Pacote " << pacote_a_transportar->getId() << " recuperado do armazém " << origem_id << " para transporte." << endl;
+                pacote_a_transportar->setEstadoAtual(Pacote::EM_TRANSITO); // Update state to in transit
+
                 // Advance the package's route (move to the next hop)
                 pacote_a_transportar->avancarRota();
 
-                // Schedule arrival at the next destination
-                // The time of arrival is current_time + TEMPO_TRANSPORTE_ARMAZENS
-                double tempo_chegada_destino = relogio + TEMPO_TRANSPORTE_ARMAZENS;
-                
-                Evento* chegada_destino_ev;
-                // Check if the package has reached its final destination
-                if (pacote_a_transportar->getProximoSalto() == -1) { // -1 means final destination
-                    chegada_destino_ev = new ChegadaPacoteEvento(tempo_chegada_destino, pacote_a_transportar, pacote_a_transportar->getDestino());
-                    cout << "    Pacote " << pacote_a_transportar->getId() << " a caminho do destino final " << pacote_a_transportar->getDestino() << " (chega em T=" << fixed << setprecision(2) << tempo_chegada_destino << ")" << endl;
+                // Calculate arrival time at next location (current time + transport time)
+                double tempo_chegada_no_proximo_local = relogio + TEMPO_TRANSPORTE_ARMAZENS;
+
+                // Schedule the next arrival event for this package
+                if (pacote_a_transportar->getProximoSalto() == -1) { 
+                    // Package is going to its FINAL destination
+                    Evento* chegada_final_ev = new ChegadaPacoteEvento(tempo_chegada_no_proximo_local, pacote_a_transportar, pacote_a_transportar->getDestino());
+                    escalonador.Inserir(chegada_final_ev);
+                    cout << "    Pacote " << pacote_a_transportar->getId() << " a caminho do DESTINO FINAL " << pacote_a_transportar->getDestino() << " (chega em T=" << fixed << setprecision(2) << tempo_chegada_no_proximo_local << ")" << endl;
                 } else {
-                    chegada_destino_ev = new ChegadaPacoteEvento(tempo_chegada_destino, pacote_a_transportar, pacote_a_transportar->getRota()->valorInteiro);
-                    cout << "    Pacote " << pacote_a_transportar->getId() << " a caminho do armazém intermediário " << pacote_a_transportar->getRota()->valorInteiro << " (chega em T=" << fixed << setprecision(2) << tempo_chegada_destino << ")" << endl;
+                    // Package is going to an INTERMEDIATE warehouse
+                    Evento* chegada_intermediaria_ev = new ChegadaPacoteEvento(tempo_chegada_no_proximo_local, pacote_a_transportar, pacote_a_transportar->getRota()->valorInteiro);
+                    escalonador.Inserir(chegada_intermediaria_ev);
+                    cout << "    Pacote " << pacote_a_transportar->getId() << " a caminho do armazém intermediário " << pacote_a_transportar->getRota()->valorInteiro << " (chega em T=" << fixed << setprecision(2) << tempo_chegada_no_proximo_local << ")" << endl;
                 }
-                escalonador.Inserir(chegada_destino_ev);
                 pacotes_transportados_count++;
             }
         }
     } else {
-        cout << "  Nenhuma seção encontrada para transporte de " << origem_id << " para " << destino_id << endl;
+        cout << "  Nenhuma seção encontrada ou vazia para transporte de " << origem_id << " para " << destino_id << endl;
     }
 
-    // Reschedule the next transport event for this pair of warehouses
-    // Assuming transports happen periodically.
+    // Reschedule this transport event for the next period, ensuring recurring transports.
+    // This is relative to the *current* simulation time.
     Evento* proximo_transport_ev = new TransporteEvento(relogio + TEMPO_TRANSPORTE_ARMAZENS, origem_id, destino_id, capacidade_transporte);
     escalonador.Inserir(proximo_transport_ev);
+    cout << "  Agendado próxima oportunidade de transporte de " << origem_id << " para " << destino_id << " em T=" << fixed << setprecision(2) << relogio + TEMPO_TRANSPORTE_ARMAZENS << endl;
 }
 
-
-// This method is called when a package reaches its final destination.
 void Simulador::registrarEntregaPacote(Pacote* pacote) {
     cout << "  !!! Pacote " << pacote->getId() << " ENTREGUE no armazém " << pacote->getDestino() << " em T=" << fixed << setprecision(2) << relogio << " !!!" << endl;
-    // TODO: Update package status to DELIVERED and calculate final metrics.
-    // For now, we just print a message.
-    delete pacote; // Package delivered, can be deleted from memory
+    pacote->setEstadoAtual(Pacote::ENTREGUE); // Update state
+    pacotesAtivos--; // Decrement the count of active packages
+
+    // TODO: Calculate and store final package statistics (e.g., total time in system,
+    // tempo_armazenado, tempo_em_transito). This needs to be done *before* deleting the package.
+    // For `tempo_esperado_estadia`, it would be `relogio - pacote->getTempoChegadaOrigem()`.
+    
+    // For now, just deleting the package.
+    delete pacote; 
 }
 
 void Simulador::calcularERegistrarRota(Pacote* pacote) {
-    // This is handled during package creation in the constructor,
-    // where calculaRota2 is called and the result is set using pacote->setRota().
-    // So this method might not be strictly necessary as a separate step in the simulation loop.
+    // This method is conceptually handled during package creation and initial scheduling.
+    // No direct action needed here during simulation execution.
 }

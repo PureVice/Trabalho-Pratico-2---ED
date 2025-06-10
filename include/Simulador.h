@@ -24,7 +24,7 @@ private:
     Armazem* armazens;
     Escalonador escalonador; // Make sure this is properly initialized
     double relogio; // Tempo atual da simulação em horas
-    
+    int pacotesAtivos; // Total de pacotes ativos na simulação
     void inicializarTransportes(); // Schedules the initial transport events
     void processarChegadaPacote(ChegadaPacoteEvento* evento); // Handles package arrival at an warehouse
     void processarTransporte(TransporteEvento* evento); // Handles package transport between warehouses

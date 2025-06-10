@@ -24,6 +24,7 @@ public:
     void setNumDestnPossiveis(int numDestnPossiveis);
     int getNumDestnPossiveis();
     static void imprimePacotes(Armazem * armazem);
+    
     // The previous creaSecao was problematic. The new findOrCreateSecao is better.
     // void criaSecao(int destino, int total_armazens); // Remove or keep if still needed elsewhere
 
