@@ -1,40 +1,36 @@
 #ifndef ARMAZEM_H
 #define ARMAZEM_H
 
-#include "Pacote.h"
 #include "Secao.h"
+#include "Pacote.h"
 
-// Estrutura de nó para pilha de pacotes
-
-// armazem --> secoes --> pilha --> pacotes
+// A classe Armazem representa um centro de distribuição na rede.
+// Ele contém várias seções, cada uma destinada a um armazém vizinho.
 class Armazem
 {
 public:
     Armazem();
-    Armazem(int id, int numDestnPossiveis);
+    // Construtor que define o ID e o número de destinos possíveis.
+    Armazem(int id, int numTotalArmazens);
     ~Armazem();
 
-    void armazenarPacote(Pacote *pacote);
-    Pacote *recuperarPacote(int destino);
-    bool temPacoteParaDestino(int destino) const;
-    void setId(int id);
-    int getId();
-    Secao *getSecao(int index) { return &secoes[index]; }
-    Secao *getSecoes() { return secoes; }
-    void setNumDestnPossiveis(int numDestnPossiveis);
-    int getNumDestnPossiveis();
-    static void imprimePacotes(Armazem * armazem);
+    // Armazena um pacote na seção correta, com base no seu próximo destino.
+    void armazenarPacote(Pacote* pacote);
     
-    // The previous creaSecao was problematic. The new findOrCreateSecao is better.
-    // void criaSecao(int destino, int total_armazens); // Remove or keep if still needed elsewhere
+    // Encontra a seção correspondente a um ID de destino.
+    Secao* getSecaoPorDestino(int idDestino);
+
+    // --- Getters e Setters ---
+    void setId(int id);
+    int getId() const;
+
+    // Para depuração: imprime todos os pacotes em todas as seções.
+    void imprimePacotesArmazenados() const;
 
 private:
-    int id;
-    int numDestnPossiveis; // número total de armazéns
-    Secao *secoes;         // cada seção tem uma pilha
-
-    // Add the declaration for the new helper method here:
-    Secao* findOrCreateSecao(int destino_id);
+    int id;                // Identificador único do armazém.
+    int numSecoes;         // O número de seções (geralmente, o total de armazéns).
+    Secao* secoes;         // Array de seções de armazenamento.
 };
 
 #endif // ARMAZEM_H

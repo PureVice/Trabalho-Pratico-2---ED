@@ -1,17 +1,20 @@
-#include "../include/Simulador.h" // Incluir o simulador
+#include "../include/Simulador.h"
 #include <iostream>
-#include <fstream>
 
+// Ponto de entrada do programa.
 int main(int argc, char **argv) {
+    // Verifica se o argumento da linha de comando (arquivo de entrada) foi fornecido.
     if (argc < 2) {
-        std::cerr << "Uso: " << argv[0] << " <arquivo_entrada.txt>" << std::endl;
-        return 1;
+        std::cerr << "ERRO: Arquivo de entrada não especificado." << std::endl;
+        std::cerr << "Uso: " << argv[0] << " <arquivo_de_entrada.txt>" << std::endl;
+        return 1; // Retorna um código de erro.
     }
-    Simulador sim(argv[1]); // Constructor loads data and schedules initial events
+
+    // Cria o objeto Simulador. O construtor já carrega os dados do arquivo.
+    Simulador sim(argv[1]);
    
-    sim.executar(); // Run the simulation
+    // Executa a simulação.
+    sim.executar();
 
-    std::cout << "Simulacao concluida." << std::endl;
-
-    return 0;
+    return 0; // Termina com sucesso.
 }

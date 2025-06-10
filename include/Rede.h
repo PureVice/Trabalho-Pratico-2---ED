@@ -1,38 +1,36 @@
 #ifndef REDE_H
 #define REDE_H
-#include "Armazem.h"
-#include "Lista.h"
-// Enum para o tipo de dado armazenado na lista genérica
 
+#include "Lista.h"
+#include "Armazem.h"
+
+// A classe Rede modela o grafo de conexões entre os armazéns.
 class Rede
 {
-private:
-    Lista **adjacencias; // Array de listas de adjacência (acesso O(1))
-    int numArmazens;     // Número de armazéns na rede
-    int capacidade;      // Capacidade máxima do array
-
 public:
-    // Construtor agora recebe o total de armazéns para pré-alocar a memória
-    Rede(int num_armazens_total);
-    // Destrutor para liberar toda a memória alocada
+    // Construtor que recebe o número total de armazéns para inicializar o grafo.
+    Rede(int numArmazens);
     ~Rede();
 
-    // Insere uma aresta de 'v' para 'w'. Agora é um método da classe.
+    // Insere uma aresta (conexão) entre dois armazéns 'v' e 'w'.
     void InsereAresta(int v, int w);
 
-    // Métodos para obter as métricas da rede (agora mais eficientes)
-    int QuantidadeArmazens() const;
-    int QuantidadeArestas() const;
-    int GrauMinimo() const;
-    int GrauMaximo() const;
-    int getNumArmazens() const { return numArmazens; }
-    // Imprime os vizinhos de um dado armazém
-    void ImprimeVizinhos(int v) const;
-    void CriaSecoes(int v, Armazem *armazem);
-    // Retorna a lista de adjacências de um armazém (usado pelo BFS)
-    Lista *getVizinhos(int v) const;
+    // Retorna a lista de vizinhos (adjacências) de um dado armazém.
+    Lista* getVizinhos(int v) const;
+
+    // --- Getters para propriedades do grafo ---
+    int getNumArmazens() const;
+    void Imprime() const; // Para depuração.
+
+private:
+    int numArmazens;     // Número de vértices (armazéns) no grafo.
+    Lista** adjacencias; // Array de listas de adjacência.
 };
 
+// --- Funções Auxiliares ---
 
-Lista *calculaRota2(const Rede &rede, int origem, int destino, int numArmazens, int &tamanhoRota);
+// Função que calcula a rota mais curta (em número de saltos) entre uma origem e um destino.
+// Usa o algoritmo de Busca em Largura (BFS).
+Lista* calculaRota(const Rede& rede, int origem, int destino);
+
 #endif // REDE_H

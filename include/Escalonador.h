@@ -1,31 +1,40 @@
 #ifndef ESCALONADOR_H
 #define ESCALONADOR_H
 
-#include "Evento.h" // Inclui a definição de Evento
+#include "Evento.h" // O Escalonador gerencia ponteiros para Eventos.
 
 class Escalonador {
 public:
-    Escalonador(int capacidadeInicial = 100); // Construtor com capacidade inicial
+    // Construtor pode receber uma capacidade inicial para a heap.
+    Escalonador(int capacidadeInicial = 100);
     ~Escalonador();
 
-    void Inserir(Evento* ev); // Agora insere um ponteiro para Evento
-    Evento* Remover();        // Agora remove e retorna um ponteiro para Evento
+    // Insere um novo evento na fila de prioridade.
+    void Inserir(Evento* ev);
 
+    // Remove e retorna o evento de maior prioridade (menor chave) da fila.
+    Evento* Remover();
+
+    // Verifica se a fila de prioridade está vazia.
     bool Vazio() const;
 
 private:
+    // --- Métodos auxiliares para a Heap ---
     int GetAncestral(int posicao);
     int GetSucessorEsq(int posicao);
     int GetSucessorDir(int posicao);
 
+    // Métodos para manter a propriedade da Min-Heap.
     void HeapifyPorBaixo(int posicao);
     void HeapifyPorCima(int posicao);
 
-    void redimensionar(); // Para evitar estouro de capacidade
+    // Método para aumentar a capacidade da heap dinamicamente.
+    void redimensionar();
 
+    // --- Membros da classe ---
     int tamanho;
     int capacidade;
-    Evento** data; // O heap agora é um array de ponteiros para Evento
+    Evento** data; // A heap é implementada como um array de ponteiros para Evento.
 };
 
-#endif
+#endif // ESCALONADOR_H

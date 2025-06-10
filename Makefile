@@ -32,7 +32,7 @@ SRC_FOLDER = ./src/
 
 # all sources, objs, and header files
 MAIN = Main
-TARGET = run.out
+TARGET = tp3.out
 SRC = $(wildcard $(SRC_FOLDER)*.cc)
 OBJ = $(patsubst $(SRC_FOLDER)%.cc, $(OBJ_FOLDER)%.o, $(SRC))
 

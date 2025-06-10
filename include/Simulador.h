@@ -1,35 +1,53 @@
 #ifndef SIMULADOR_H
 #define SIMULADOR_H
+
 #include "Rede.h"
 #include "Armazem.h"
 #include "Evento.h"
 #include "Escalonador.h"
 #include "Pacote.h"
-
-// Define constants for time in hours
-#define TEMPO_MANIPULACAO_PACOTE 1.0 // Tempo de manipulação de pacote na respectiva sala do armazém.
-#define TEMPO_TRANSPORTE_ARMAZENS 3.0 // Tempo de transporte entre dois armazéns.
+#include "Lista.h" // Para o log de saída.
+#include <string>
 
 class Simulador {
 public:
-    Simulador(const char* arquivo); // Construtor que recebe o nome do arquivo de entrada
+    // O construtor recebe o caminho do arquivo de entrada.
+    Simulador(const char* arquivoEntrada);
     ~Simulador();
     
+    // Inicia e executa a simulação até que não haja mais eventos.
     void executar();
-    // void carregarDados(const char* arquivo); // This method is now integrated into the constructor
 
 private:
+    // --- Parâmetros da Simulação (lidos do arquivo) ---
+    int capacidadeTransporte;
+    double latenciaTransporte;
+    double intervaloTransportes;
+    double custoRemocao;
+
+    // --- Componentes do Sistema ---
     Rede* rede;
     int numArmazens;
-    Armazem* armazens;
-    Escalonador escalonador; // Make sure this is properly initialized
-    double relogio; // Tempo atual da simulação em horas
-    int pacotesAtivos; // Total de pacotes ativos na simulação
-    void inicializarTransportes(); // Schedules the initial transport events
-    void processarChegadaPacote(ChegadaPacoteEvento* evento); // Handles package arrival at an warehouse
-    void processarTransporte(TransporteEvento* evento); // Handles package transport between warehouses
-    void calcularERegistrarRota(Pacote* pacote); // Calculates and records the route for a package
-    void registrarEntregaPacote(Pacote* pacote); // Registers package delivery
+    Armazem** armazens; // Usando array de ponteiros para controlar a criação.
+    Escalonador escalonador;
+    
+    // --- Controle da Simulação ---
+    double relogio;
+    int pacotesAtivos; // Contador de pacotes ainda não entregues.
+    Lista* logSaida; // Lista para armazenar as strings de log para a saída final.
+
+    // --- Métodos Privados Auxiliares ---
+    void carregarDados(const char* arquivoEntrada);
+    void inicializarTransportes();
+    
+    // Métodos para processar os diferentes tipos de eventos.
+    void processarChegadaPacote(ChegadaPacoteEvento* evento);
+    void processarTransporte(TransporteEvento* evento);
+    
+    // Métodos de logging e formatação para a saída.
+    void registrarLog(double tempo, int idPacote, const std::string& mensagem);
+    void imprimirLogs();
+    std::string formatarId(int id, int largura);
 };
 
-#endif
+#endif // SIMULADOR_H

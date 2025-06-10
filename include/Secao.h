@@ -1,46 +1,57 @@
 #ifndef SECAO_H
 #define SECAO_H
+
 #include "Pacote.h"
 
+// --- Estrutura do Nó da Pilha ---
+// Um nó simples para a lista encadeada que forma a pilha.
 struct NoPilha {
     Pacote* pacote;
     NoPilha* proximo;
 };
 
+// --- Classe PilhaPacotes ---
+// Implementa a lógica LIFO (Last-In, First-Out) para os pacotes.
 class PilhaPacotes {
 public:
     PilhaPacotes();
     ~PilhaPacotes();
 
-    void empilhar(Pacote* pacote);
-    Pacote* desempilhar();
-    Pacote* topo();
+    void empilhar(Pacote* pacote); // Adiciona um pacote no topo.
+    Pacote* desempilhar();         // Remove e retorna o pacote do topo.
+    Pacote* topo() const;          // Apenas retorna o pacote do topo, sem remover.
     bool vazia() const;
-    void imprimePilha() const;
+    void imprimePilha() const;     // Para depuração.
+    int getTamanho() const;        // Retorna o número de pacotes na pilha.
+    
+    // Retorna uma cópia dos pacotes como um array para análise.
+    // O chamador é responsável por deletar o array retornado.
+    Pacote** getPacotes() const;
+
 private:
     NoPilha* topoPilha;
-    
+    int tamanho;
 };
 
+
+// --- Classe Secao ---
+// Representa uma seção de armazenamento dentro de um Armazém.
 class Secao {
 public:
     Secao();
-    Secao(int id_armazem);
     ~Secao();
+
     void addPacote(Pacote* pacote);
-    Pacote* desempilhar();
-    Pacote* topo();
-    bool vazia() const;
-    int getIdArmazem() const;
-    void setIdArmazem(int id);
+    Pacote* desempilharPacote();
+    PilhaPacotes* getPilha(); // Permite acesso à pilha interna.
+    bool estaVazia() const;
+    int getIdArmazemDestino() const;
+    void setIdArmazemDestino(int id);
     void imprimeSecao() const;
-    
+
 private:
-    int id_armazem;
-    PilhaPacotes * pilhaPacotes; // Pilha de pacotes nesta seção
+    int idArmazemDestino; // Para qual armazém esta seção envia pacotes.
+    PilhaPacotes* pilhaPacotes;
 };
 
-
-
-
-#endif
+#endif // SECAO_H
