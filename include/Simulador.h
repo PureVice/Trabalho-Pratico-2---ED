@@ -7,7 +7,7 @@
 #include "Escalonador.h"
 #include "Pacote.h"
 #include "Lista.h" // Para o log de saída.
-#include <string>
+// #include <string> // Removido
 
 class Simulador {
 public:
@@ -45,9 +45,10 @@ private:
     void processarTransporte(TransporteEvento* evento);
     
     // Métodos de logging e formatação para a saída.
-    void registrarLog(double tempo, int idPacote, const std::string& mensagem);
+    // Assinaturas alteradas para remover std::string
+    void registrarLog(double tempo, int idPacote, const char* mensagem);
     void imprimirLogs();
-    std::string formatarId(int id, int largura);
+    void formatarId(int id, int largura, char* buffer);
 };
 
 #endif // SIMULADOR_H

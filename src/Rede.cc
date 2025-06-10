@@ -1,8 +1,6 @@
 #include "../include/Rede.h"
 #include "../include/Fila.h"
 #include <iostream>
-#include <vector> // Usado temporariamente para inverter a rota.
-#include <algorithm> // Para std::reverse
 
 // --- Implementação da Classe Rede ---
 
@@ -91,19 +89,30 @@ Lista* calculaRota(const Rede& rede, int origem, int destino) {
 
     // Se o destino foi alcançado, reconstrói o caminho.
     if (visitados[destino]) {
-        std::vector<int> caminhoInvertido;
+        int contadorPassos = 0;
         int atualNaRota = destino;
+        // Primeiro, conta quantos passos a rota possui
         while (atualNaRota != -1) {
-            caminhoInvertido.push_back(atualNaRota);
+            contadorPassos++;
             atualNaRota = predecessores[atualNaRota];
         }
-        // Inverte o vetor para ter a ordem correta (origem -> destino).
-        std::reverse(caminhoInvertido.begin(), caminhoInvertido.end());
+
+        // Aloca um array temporário para armazenar a rota na ordem correta
+        int* caminhoCorreto = new int[contadorPassos];
         
-        // Adiciona os nós à lista na ordem correta.
-        for(int no : caminhoInvertido) {
-            rota->adicionaInteiro(no);
+        atualNaRota = destino;
+        // Preenche o array da última posição para a primeira (invertendo a ordem)
+        for (int i = contadorPassos - 1; i >= 0; i--) {
+            caminhoCorreto[i] = atualNaRota;
+            atualNaRota = predecessores[atualNaRota];
         }
+        
+        // Adiciona os nós do array para a lista na ordem correta.
+        for(int i = 0; i < contadorPassos; i++) {
+            rota->adicionaInteiro(caminhoCorreto[i]);
+        }
+        
+        delete[] caminhoCorreto; // Libera memória do array temporário
     }
 
     delete[] visitados;

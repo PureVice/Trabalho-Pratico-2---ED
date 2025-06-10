@@ -1,7 +1,7 @@
 #ifndef LISTA_H
 #define LISTA_H
 
-#include <string> // O uso de string é permitido pelo enunciado.
+// O uso de string foi removido para atender aos requisitos.
 
 // Enum para identificar o tipo de dado em cada célula da lista.
 enum TipoVariavel
@@ -15,7 +15,7 @@ struct Celula
 {
     // A célula pode armazenar um dos seguintes tipos de dados.
     int valorInteiro;
-    std::string valorString;
+    char* valorString; // Alterado de std::string para char*
     
     TipoVariavel tipo;
     Celula *proximo;
@@ -30,7 +30,7 @@ public:
 
     // Métodos para adicionar itens ao final da lista.
     void adicionaInteiro(int valor);
-    void adicionaString(const std::string& valor);
+    void adicionaString(const char* valor); // Assinatura alterada
 
     // Métodos para verificar estado ou obter dados.
     bool vazia() const;

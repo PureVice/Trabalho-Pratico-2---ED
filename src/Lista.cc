@@ -1,5 +1,6 @@
 #include "../include/Lista.h"
 #include <iostream>
+#include <cstring> // Adicionado para strlen e strcpy
 
 // --- Implementação da Classe Lista ---
 
@@ -9,6 +10,10 @@ Lista::~Lista() {
     Celula* atual = inicio;
     while (atual != nullptr) {
         Celula* proximo = atual->proximo;
+        // Libera a memória alocada para a string se for do tipo TIPO_STRING
+        if (atual->tipo == TIPO_STRING && atual->valorString != nullptr) {
+            delete[] atual->valorString;
+        }
         delete atual;
         atual = proximo;
     }
@@ -28,10 +33,16 @@ void Lista::adicionaInteiro(int valor) {
     }
 }
 
-void Lista::adicionaString(const std::string& valor) {
+void Lista::adicionaString(const char* valor) {
     Celula* nova = new Celula();
     nova->tipo = TIPO_STRING;
-    nova->valorString = valor;
+    // Aloca memória para a nova string e copia o conteúdo
+    if (valor) {
+        nova->valorString = new char[strlen(valor) + 1];
+        strcpy(nova->valorString, valor);
+    } else {
+        nova->valorString = nullptr;
+    }
     nova->proximo = nullptr;
 
     if (vazia()) {
@@ -59,7 +70,9 @@ void Lista::imprime() const {
             std::cout << aux->valorInteiro << " ";
         } else if (aux->tipo == TIPO_STRING) {
             // Para strings (logs), imprime cada uma em uma nova linha.
-            std::cout << aux->valorString << std::endl;
+            if(aux->valorString) {
+                std::cout << aux->valorString << std::endl;
+            }
         }
         aux = aux->proximo;
     }

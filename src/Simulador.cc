@@ -1,11 +1,10 @@
 #include "../include/Simulador.h"
 #include <iostream>
 #include <fstream>
-#include <iomanip>
-#include <sstream>
-#include <algorithm>
-#include <vector>
-#include <cmath>
+#include <iomanip> // Mantido para std::setw e std::setfill, se necessário em cout.
+#include <cmath>   // Para round
+#include <cstdio>  // Para sprintf
+#include <cstring> // Para strcpy e outros
 
 // --- Implementação da Classe Simulador ---
 
@@ -61,8 +60,8 @@ void Simulador::carregarDados(const char* arquivoEntrada) {
     for (int i = 0; i < numPacotes; ++i) {
         double tempoPostagem;
         int idPacote, idOrigem, idDestino;
-        std::string pac_str, org_str, dst_str; 
-        arquivo >> tempoPostagem >> pac_str >> idPacote >> org_str >> idOrigem >> dst_str >> idDestino;
+        char buffer[10]; // Buffer para ler "pac", "org", "dst"
+        arquivo >> tempoPostagem >> buffer >> idPacote >> buffer >> idOrigem >> buffer >> idDestino;
 
         Pacote* p = new Pacote(idPacote, idOrigem, idDestino, tempoPostagem);
         p->setRota(calculaRota(*rede, idOrigem, idDestino));
@@ -77,7 +76,6 @@ void Simulador::executar() {
     inicializarTransportes();
     while (!escalonador.Vazio() && pacotesAtivos > 0) {
         Evento* proximoEvento = escalonador.Remover();
-        // O relógio só avança se o tempo do evento for futuro.
         if (proximoEvento->getTempo() > relogio) {
             relogio = proximoEvento->getTempo();
         }
@@ -112,14 +110,23 @@ void Simulador::processarChegadaPacote(ChegadaPacoteEvento* evento) {
     Pacote* pacote = evento->getPacote();
     int armazemId = evento->getArmazemChegada();
     
+    char msgBuffer[100];
+    char idBuffer[4];
+
     if (armazemId == pacote->getDestino()) {
         pacote->setEstado(Pacote::ENTREGUE);
-        registrarLog(evento->getTempo(), pacote->getId(), "entregue em " + formatarId(armazemId, 3));
+        formatarId(armazemId, 3, idBuffer);
+        sprintf(msgBuffer, "entregue em %s", idBuffer);
+        registrarLog(evento->getTempo(), pacote->getId(), msgBuffer);
         pacotesAtivos--;
         delete pacote;
     } else {
         armazens[armazemId]->armazenarPacote(pacote);
-        registrarLog(evento->getTempo(), pacote->getId(), "armazenado em " + formatarId(armazemId, 3) + " na secao " + formatarId(pacote->getProximoSalto(), 3));
+        char idBufferProx[4];
+        formatarId(armazemId, 3, idBuffer);
+        formatarId(pacote->getProximoSalto(), 3, idBufferProx);
+        sprintf(msgBuffer, "armazenado em %s na secao %s", idBuffer, idBufferProx);
+        registrarLog(evento->getTempo(), pacote->getId(), msgBuffer);
     }
 }
 
@@ -141,32 +148,54 @@ void Simulador::processarTransporte(TransporteEvento* evento) {
     PilhaPacotes* pilha = secao->getPilha();
     int numPacotesNaSecao = pilha->getTamanho();
     Pacote** pacotesNaSecao = pilha->getPacotes();
-    std::sort(pacotesNaSecao, pacotesNaSecao + numPacotesNaSecao, compararPacotes);
-    int pacotesATransportarCount = std::min(numPacotesNaSecao, capacidadeTransporte);
-    std::vector<Pacote*> pacotesSelecionados(pacotesNaSecao, pacotesNaSecao + pacotesATransportarCount);
+
+    // Substituição de std::sort por Insertion Sort
+    for (int i = 1; i < numPacotesNaSecao; i++) {
+        Pacote* chave = pacotesNaSecao[i];
+        int j = i - 1;
+        while (j >= 0 && compararPacotes(chave, pacotesNaSecao[j])) {
+            pacotesNaSecao[j + 1] = pacotesNaSecao[j];
+            j = j - 1;
+        }
+        pacotesNaSecao[j + 1] = chave;
+    }
+
+    int pacotesATransportarCount = (numPacotesNaSecao < capacidadeTransporte) ? numPacotesNaSecao : capacidadeTransporte;
+    
+    // Substituição de std::vector por array dinâmico
+    Pacote** pacotesSelecionados = new Pacote*[pacotesATransportarCount];
+    for(int i = 0; i < pacotesATransportarCount; ++i) {
+        pacotesSelecionados[i] = pacotesNaSecao[i];
+    }
     
     double tempoDaOperacao = relogio + 1.0; 
     PilhaPacotes pilhaTemporaria;
     
+    char msgBuffer[100];
+    char idOrigemBuffer[4], idDestinoBuffer[4];
+    formatarId(origemId, 3, idOrigemBuffer);
+    formatarId(destinoId, 3, idDestinoBuffer);
+
     while(!pilha->vazia()) {
         Pacote* pacoteDoTopo = pilha->desempilhar();
         tempoDaOperacao += custoRemocao;
-        registrarLog(tempoDaOperacao, pacoteDoTopo->getId(), "removido de " + formatarId(origemId, 3) + " na secao " + formatarId(destinoId, 3));
+        
+        sprintf(msgBuffer, "removido de %s na secao %s", idOrigemBuffer, idDestinoBuffer);
+        registrarLog(tempoDaOperacao, pacoteDoTopo->getId(), msgBuffer);
         
         bool transportarEste = false;
-        for(size_t i=0; i<pacotesSelecionados.size(); ++i) {
+        for(int i=0; i<pacotesATransportarCount; ++i) {
             if(pacotesSelecionados[i] == pacoteDoTopo) {
                 transportarEste = true;
                 break;
             }
         }
+
         if(transportarEste) {
-            // *** CORREÇÃO DO LOOP INFINITO ESTÁ AQUI ***
-            // Avançamos a rota do pacote no momento da saída.
             pacoteDoTopo->avancarRota();
-            
             pacoteDoTopo->setEstado(Pacote::EM_TRANSITO);
-            registrarLog(tempoDaOperacao, pacoteDoTopo->getId(), "em transito de " + formatarId(origemId, 3) + " para " + formatarId(destinoId, 3));
+            sprintf(msgBuffer, "em transito de %s para %s", idOrigemBuffer, idDestinoBuffer);
+            registrarLog(tempoDaOperacao, pacoteDoTopo->getId(), msgBuffer);
             Evento* chegadaEv = new ChegadaPacoteEvento(tempoDaOperacao + latenciaTransporte, pacoteDoTopo, destinoId);
             escalonador.Inserir(chegadaEv);
         } else {
@@ -177,27 +206,33 @@ void Simulador::processarTransporte(TransporteEvento* evento) {
     while(!pilhaTemporaria.vazia()) {
         Pacote* pacoteParaRearmazenar = pilhaTemporaria.desempilhar();
         pilha->empilhar(pacoteParaRearmazenar);
-        registrarLog(tempoDaOperacao, pacoteParaRearmazenar->getId(), "rearmazenado em " + formatarId(origemId, 3) + " na secao " + formatarId(destinoId, 3));
+        sprintf(msgBuffer, "rearmazenado em %s na secao %s", idOrigemBuffer, idDestinoBuffer);
+        registrarLog(tempoDaOperacao, pacoteParaRearmazenar->getId(), msgBuffer);
     }
 
     Evento* proximoTransporte = new TransporteEvento(relogio + intervaloTransportes, origemId, destinoId);
     escalonador.Inserir(proximoTransporte);
     
     delete[] pacotesNaSecao;
+    delete[] pacotesSelecionados; // Liberar memória do array dinâmico
 }
 
-void Simulador::registrarLog(double tempo, int idPacote, const std::string& mensagem) {
-    std::ostringstream oss;
-    oss << std::setw(7) << std::setfill('0') << static_cast<int>(round(tempo)) << " pacote " << formatarId(idPacote, 3) << " " << mensagem;
-    logSaida->adicionaString(oss.str());
+void Simulador::registrarLog(double tempo, int idPacote, const char* mensagem) {
+    char logBuffer[256];
+    char idPacoteBuffer[4];
+    formatarId(idPacote, 3, idPacoteBuffer);
+    
+    // Formata a string de log final
+    sprintf(logBuffer, "%07d pacote %s %s", static_cast<int>(round(tempo)), idPacoteBuffer, mensagem);
+    
+    logSaida->adicionaString(logBuffer);
 }
 
 void Simulador::imprimirLogs() {
     logSaida->imprime();
 }
 
-std::string Simulador::formatarId(int id, int largura) {
-    std::ostringstream oss;
-    oss << std::setw(largura) << std::setfill('0') << id;
-    return oss.str();
+void Simulador::formatarId(int id, int largura, char* buffer) {
+    // Usa sprintf para formatar o número com zeros à esquerda no buffer fornecido
+    sprintf(buffer, "%0*d", largura, id);
 }
