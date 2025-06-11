@@ -6,7 +6,7 @@
 #include "Evento.h"
 #include "Escalonador.h"
 #include "Pacote.h"
-#include "Lista.h" // Para o log de saída.
+#include "Utils.h" // Para o log de saída.
 // #include <string> // Removido
 
 class Simulador {

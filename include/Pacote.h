@@ -1,7 +1,7 @@
 #ifndef PACOTE_H
 #define PACOTE_H
 
-#include "Lista.h" // Inclui a nova classe Lista
+#include "Utils.h" // Inclui a nova classe Lista
 
 class Pacote {
 public: 

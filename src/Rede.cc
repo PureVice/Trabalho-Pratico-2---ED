@@ -1,5 +1,5 @@
 #include "../include/Rede.h"
-#include "../include/Fila.h"
+#include "../include/Utils.h"
 #include <iostream>
 
 // --- Implementação da Classe Rede ---

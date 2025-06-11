@@ -1,7 +1,7 @@
 #ifndef REDE_H
 #define REDE_H
 
-#include "Lista.h"
+#include "Utils.h"
 #include "Armazem.h"
 
 // A classe Rede modela o grafo de conexões entre os armazéns.
