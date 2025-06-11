@@ -35,7 +35,7 @@ private:
     double relogio;
     int pacotesAtivos; // Contador de pacotes ainda não entregues.
     Lista* logSaida; // Lista para armazenar as strings de log para a saída final.
-
+    double tempoPrimeiroPacote;
     // --- Métodos Privados Auxiliares ---
     void carregarDados(const char* arquivoEntrada);
     void inicializarTransportes();

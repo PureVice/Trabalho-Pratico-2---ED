@@ -73,18 +73,32 @@ void Simulador::carregarDados(const char* arquivoEntrada) {
 }
 
 void Simulador::executar() {
-    inicializarTransportes();
-    while (!escalonador.Vazio() && pacotesAtivos > 0) {
-        Evento* proximoEvento = escalonador.Remover();
+inicializarTransportes();
+    bool primeiroPacoteProcessado = false; // NOVO: Flag de controle
+
+    while (!escalonador.Vazio() && pacotesAtivos > 0)
+    {
+        Evento *proximoEvento = escalonador.Remover();
         
-        if (proximoEvento->getTempo() > relogio) {
+        // NOVO: Bloco para imprimir o timestamp do primeiro evento de pacote
+        if (!primeiroPacoteProcessado && proximoEvento->getTipo() == CHEGADA_PACOTE)
+        {
+            tempoPrimeiroPacote = proximoEvento->getTempo();
+            primeiroPacoteProcessado = true;
+        }
+        if (proximoEvento->getTempo() > relogio)
+        {
             relogio = proximoEvento->getTempo();
         }
 
-        if (proximoEvento->getTipo() == CHEGADA_PACOTE) {
-            processarChegadaPacote(static_cast<ChegadaPacoteEvento*>(proximoEvento));
-        } else if (proximoEvento->getTipo() == TRANSPORTE) {
-            processarTransporte(static_cast<TransporteEvento*>(proximoEvento));
+        if (proximoEvento->getTipo() == CHEGADA_PACOTE)
+        {
+            processarChegadaPacote(static_cast<ChegadaPacoteEvento *>(proximoEvento));
+        }
+        else if (proximoEvento->getTipo() == TRANSPORTE)
+        {
+            // relogio+=tempoPrimeiroPacote;
+            processarTransporte(static_cast<TransporteEvento *>(proximoEvento));
         }
         delete proximoEvento;
     }
@@ -172,7 +186,7 @@ void Simulador::processarTransporte(TransporteEvento* evento) {
         pacotesSelecionados[i] = pacotesNaSecao[i];
     }
     
-    double tempoDaOperacao = relogio + 1.0; 
+    double tempoDaOperacao = relogio + tempoPrimeiroPacote; 
     PilhaPacotes pilhaTemporaria; // Para pacotes que serão re-empilhados
     
     char msgBuffer[100];
