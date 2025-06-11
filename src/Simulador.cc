@@ -155,39 +155,36 @@ bool compararPacotes(Pacote* a, Pacote* b) {
 }
 
 void Simulador::processarTransporte(TransporteEvento* evento) {
-    int origemId = evento->getOrigem();
+        int origemId = evento->getOrigem();
     int destinoId = evento->getDestino();
+
+    // Reagenda o próximo transporte para esta rota imediatamente
+    Evento* proximoTransporte = new TransporteEvento(relogio + intervaloTransportes, origemId, destinoId);
+    escalonador.Inserir(proximoTransporte);
 
     Secao* secao = armazens[origemId]->getSecaoPorDestino(destinoId);
     if (secao == nullptr || secao->estaVazia()) {
-        Evento* proximoTransporte = new TransporteEvento(relogio + intervaloTransportes, origemId, destinoId);
-        escalonador.Inserir(proximoTransporte);
-        return;
+        return; // Nenhum pacote para transportar, evento já foi reagendado.
     }
 
     PilhaPacotes* pilha = secao->getPilha();
     int numPacotesNaSecao = pilha->getTamanho();
-    Pacote** pacotesNaSecao = pilha->getPacotes();
+    Pacote** pacotesNaSecaoLIFO = pilha->getPacotes(); // Pacotes em ordem LIFO (topo -> fundo)
 
-    for (int i = 1; i < numPacotesNaSecao; i++) {
-        Pacote* chave = pacotesNaSecao[i];
-        int j = i - 1;
-        while (j >= 0 && compararPacotes(chave, pacotesNaSecao[j])) {
-            pacotesNaSecao[j + 1] = pacotesNaSecao[j];
-            j = j - 1;
-        }
-        pacotesNaSecao[j + 1] = chave;
-    }
-
+    // --- Seleção FIFO ---
+    // Os pacotes com prioridade são os que estão no fundo da pilha (chegaram primeiro).
     int pacotesATransportarCount = (numPacotesNaSecao < capacidadeTransporte) ? numPacotesNaSecao : capacidadeTransporte;
     
+    // pacotesSelecionados conterá os N pacotes com prioridade, já em ordem FIFO.
     Pacote** pacotesSelecionados = new Pacote*[pacotesATransportarCount];
-    for(int i = 0; i < pacotesATransportarCount; ++i) {
-        pacotesSelecionados[i] = pacotesNaSecao[i];
+    for (int i = 0; i < pacotesATransportarCount; ++i) {
+        // Pega do final do array LIFO para obter a ordem FIFO
+        // Ex: Para 3 pacotes e capacidade 2, pega os índices 2 e 1 do array LIFO.
+        pacotesSelecionados[i] = pacotesNaSecaoLIFO[numPacotesNaSecao - 1 - i];
     }
     
     double tempoDaOperacao = relogio + tempoPrimeiroPacote; 
-    PilhaPacotes pilhaTemporaria; // Para pacotes que serão re-empilhados
+    PilhaPacotes pilhaTemporaria;
     
     char msgBuffer[100];
     char idOrigemBuffer[4], idDestinoBuffer[4];
@@ -195,9 +192,7 @@ void Simulador::processarTransporte(TransporteEvento* evento) {
     formatarId(destinoId, 3, idDestinoBuffer);
 
     // --- FASE 1: Remoção e Particionamento ---
-    // Esvazia a pilha da seção, registrando a remoção de cada pacote.
-    // Pacotes não selecionados para transporte são guardados em uma pilha temporária.
-    while(!pilha->vazia()) {
+    while (!pilha->vazia()) {
         Pacote* pacoteDoTopo = pilha->desempilhar();
         tempoDaOperacao += custoRemocao;
         
@@ -205,23 +200,22 @@ void Simulador::processarTransporte(TransporteEvento* evento) {
         registrarLog(tempoDaOperacao, pacoteDoTopo->getId(), msgBuffer);
         
         bool transportarEste = false;
-        for(int i=0; i<pacotesATransportarCount; ++i) {
-            if(pacotesSelecionados[i] == pacoteDoTopo) {
+        for (int i = 0; i < pacotesATransportarCount; ++i) {
+            if (pacotesSelecionados[i] == pacoteDoTopo) {
                 transportarEste = true;
                 break;
             }
         }
 
-        if(!transportarEste) {
-            // Se não for transportado, vai para a pilha temporária para ser re-empilhado.
+        if (!transportarEste) {
             pilhaTemporaria.empilhar(pacoteDoTopo);
         }
     }
     
-    // --- FASE 2: Log de Transporte e Escalonamento (A CORREÇÃO PRINCIPAL ESTÁ AQUI) ---
-    // Itera sobre o array `pacotesSelecionados`, que está na ordem correta (por tempo de postagem).
+    // --- FASE 2: Log de Transporte e Escalonamento ---
+    // Itera sobre o array `pacotesSelecionados`, que já está na ordem correta (FIFO).
     for (int i = 0; i < pacotesATransportarCount; ++i) {
-        Pacote* pacote = pacotesSelecionados[i]; // Usa o array ordenado
+        Pacote* pacote = pacotesSelecionados[i]; 
         pacote->avancarRota();
         pacote->setEstado(Pacote::EM_TRANSITO);
 
@@ -233,20 +227,15 @@ void Simulador::processarTransporte(TransporteEvento* evento) {
     }
 
     // --- FASE 3: Rearmazenamento ---
-    // Reempilha os pacotes que não foram transportados de volta para a seção.
-    while(!pilhaTemporaria.vazia()) {
+    while (!pilhaTemporaria.vazia()) {
         Pacote* pacoteParaRearmazenar = pilhaTemporaria.desempilhar();
         pilha->empilhar(pacoteParaRearmazenar);
         sprintf(msgBuffer, "rearmazenado em %s na secao %s", idOrigemBuffer, idDestinoBuffer);
         registrarLog(tempoDaOperacao, pacoteParaRearmazenar->getId(), msgBuffer);
     }
-
-    Evento* proximoTransporte = new TransporteEvento(relogio + intervaloTransportes, origemId, destinoId);
-    escalonador.Inserir(proximoTransporte);
     
-    delete[] pacotesNaSecao;
+    delete[] pacotesNaSecaoLIFO;
     delete[] pacotesSelecionados;
-     // Limpa a memória do array temporário
 }
 
 void Simulador::registrarLog(double tempo, int idPacote, const char* mensagem) {
