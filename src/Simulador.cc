@@ -62,7 +62,7 @@ void Simulador::carregarDados(const char* arquivoEntrada) {
         int idPacote, idOrigem, idDestino;
         char buffer[10];
         arquivo >> tempoPostagem >> buffer >> idPacote >> buffer >> idOrigem >> buffer >> idDestino;
-        
+        idPacote = i;
         Pacote* p = new Pacote(idPacote, idOrigem, idDestino, tempoPostagem);
         p->setRota(calculaRota(*rede, idOrigem, idDestino));
         p->setEstado(Pacote::CHEGADA_AGENDADA);

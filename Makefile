@@ -26,7 +26,7 @@ $(OBJ_FOLDER)%.o: $(SRC_FOLDER)%.cc | create_dirs
 # Regra principal
 all: create_dirs $(OBJ)
 	$(CC) $(CXXFLAGS) -o $(BIN_FOLDER)$(TARGET) $(OBJ)
-	./bin/$(TARGET) teste.txt
+	./bin/$(TARGET) teste.wkl
 
 # Regra para criação dos diretórios
 create_dirs:
@@ -35,3 +35,6 @@ create_dirs:
 
 clean:
 	@rm -rf $(OBJ_FOLDER)* $(BIN_FOLDER)*
+
+run2: all
+	./bin/$(TARGET) teste.txt
